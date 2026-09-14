@@ -1,0 +1,47 @@
+MUTUAL NON-DISCLOSURE AGREEMENT (NDA)
+
+This Mutual Non-Disclosure Agreement ("Agreement") is made and entered into as of January 10, 2026 ("Effective Date"), by and between Horizon BioTech Labs, Inc., a Delaware corporation located at 500 Discovery Parkway, Boston, MA 02118 ("Horizon"), and Apex Molecular Therapeutics, Inc., a California corporation located at 780 Genome Way, San Diego, CA 92121 ("Apex"). Horizon and Apex are collectively referred to as the "Parties" and individually as a "Party."
+
+1. PURPOSE
+The Parties wish to explore potential collaborative research and commercial partnership opportunities in molecular diagnostics (the "Purpose"), requiring the exchange of sensitive and proprietary technical and business information.
+
+2. CONFIDENTIAL INFORMATION
+"Confidential Information" refers to any proprietary information, technical data, trade secrets, clinical trial data, patents pending, customer lists, or financial data disclosed by either Party ("Disclosing Party") to the other Party ("Receiving Party"), whether orally or in writing, marked as confidential or reasonably understood to be confidential.
+
+3. OBLIGATIONS OF RECEIVING PARTY
+3.1 Duty of Care. The Receiving Party agrees to protect Confidential Information using the same degree of care it uses for its own proprietary information of like importance, but in no event less than a reasonable degree of care.
+3.2 Limited Use. The Receiving Party shall use Confidential Information solely in furtherance of the Purpose.
+3.3 Need-to-Know Disclosure. The Receiving Party shall restrict disclosure to its employees, consultants, and legal advisors who have a need to know and are bound by confidentiality obligations at least as restrictive as those herein.
+
+4. EXCLUSIONS FROM CONFIDENTIALITY
+Confidential Information does not include information that: (a) is or becomes publicly known through no breach of this Agreement; (b) was already known to the Receiving Party prior to disclosure without confidentiality restrictions; (c) is independently developed by the Receiving Party without reference to Disclosing Party's information; or (d) is received rightfully from a third party without duty of confidence.
+
+5. TERM AND EXPIRATION
+5.1 Term. This Agreement shall be effective for a period of two (2) years from the Effective Date, expiring on January 9, 2028 ("Expiration Date").
+5.2 Survival. The confidentiality obligations herein shall survive the expiration or termination of this Agreement for a period of three (3) years.
+
+6. RETURN OR DESTRUCTION OF MATERIALS
+Upon written request by the Disclosing Party, the Receiving Party shall promptly return or certify the permanent destruction of all documents and media containing Confidential Information, retaining one copy solely for archival compliance purposes.
+
+7. NO LICENSE OR IP TRANSFER
+Nothing in this Agreement grants either Party any license, patent rights, trademark rights, or copyright ownership in the Confidential Information of the other Party.
+
+8. REMEDIES & INJUNCTIVE RELIEF
+The Parties acknowledge that any unauthorized breach of this Agreement may cause irreparable harm for which monetary damages alone would be inadequate, and each Party shall be entitled to seek injunctive relief without posting a bond.
+
+9. GOVERNING LAW AND VENUE
+This Agreement shall be governed by and construed in accordance with the substantive laws of the State of Massachusetts, without regard to conflicts of law provisions. The Parties submit to the exclusive jurisdiction of the state and federal courts located in Boston, Massachusetts.
+
+10. MISCELLANEOUS
+10.1 Non-Solicitation. Neither Party shall directly solicit employees of the other for twelve (12) months.
+10.2 Entire Agreement. This Agreement sets forth the entire understanding of the Parties regarding confidential disclosures and may only be amended in writing signed by authorized officers of both Parties.
+
+IN WITNESS WHEREOF, the Parties have executed this Mutual Non-Disclosure Agreement as of the Effective Date.
+
+Horizon BioTech Labs, Inc.
+By: Dr. Sarah Lin, Chief Scientific Officer
+Date: January 10, 2026
+
+Apex Molecular Therapeutics, Inc.
+By: David K. Chen, Executive VP
+Date: January 10, 2026

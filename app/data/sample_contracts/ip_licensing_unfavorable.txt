@@ -1,0 +1,53 @@
+EXCLUSIVE INTELLECTUAL PROPERTY LICENSING AND COGNITIVE AI COMMERCIAL AGREEMENT
+
+This Exclusive Intellectual Property Licensing Agreement ("Agreement") is dated as of February 1, 2026 ("Agreement Date"), by and between Sovereign Neural Systems AG, a Swiss corporation located in Zurich, Switzerland ("Licensor"), and NexaGen Analytics Corp., a Delaware corporation located at 1200 Wall Street, New York, NY 10005 ("Licensee").
+
+RECITALS
+Licensor owns certain neural network weights, algorithmic models, and patent assets. Licensee desires to obtain access to commercialize said technologies subject to the stringent conditions herein.
+
+OPERATIVE PROVISIONS
+
+1. GRANT OF LICENSE AND UNILATERAL RESTRICTIONS
+1.1 Limited Grant. Licensor grants Licensee a revocable, non-transferable license to use the Technology. Licensor reserves the sole and unreviewable right to modify or revoke access at any time without liability.
+1.2 Exclusivity of License. Licensee shall be the exclusive distributor in North America, provided that Licensee achieves minimum royalty payments of $2,500,000 USD per quarter.
+
+2. MINIMUM COMMITMENTS & PENALTY FEES
+2.1 Guaranteed Minimum. Licensee guarantees a minimum payment of $10,000,000 USD annually ("Take-or-Pay Minimum"). If Licensee fails to meet the minimum volume for any reason whatsoever, Licensee shall immediately pay liquidated damages equal to 200% of the shortfall within five (5) calendar days.
+
+3. IP ASSIGNMENT AND WORK PRODUCT FORFEITURE
+3.1 Total Assignment. Licensee hereby irrevocably and unconditionally assigns, transfers, and conveys to Licensor all right, title, and interest worldwide in and to any and all derivative works, improvements, enhancements, inventions, modifications, and background source code developed by Licensee prior to or during the term of this Agreement.
+3.2 Work Made for Hire. All output, discoveries, and intellectual property conceived by Licensee shall automatically become the exclusive, unencumbered property of Licensor from the moment of creation.
+
+4. COMPREHENSIVE GLOBAL NON-COMPETE AND NON-SOLICITATION
+4.1 Global Non-Compete. Licensee, its affiliates, directors, and officers covenant that during the Term and for a period of five (5) years following any termination, Licensee shall not directly or indirectly develop, invest in, advise, operate, or commercialize any machine learning or algorithmic software anywhere worldwide.
+4.2 No-Hire and Customer Bar. Licensee is strictly barred from soliciting, contacting, or accepting business from any entity that has had business dealings with Licensor in the preceding ten (10) years.
+
+5. UNLIMITED UNCAPPED LIABILITY
+5.1 Licensee Unlimited Liability. Licensee's liability under this Agreement shall be completely uncapped and unlimited. In no event shall any limitation of liability or cap apply to Licensee for any breaches, indemnities, loss of anticipated profits, or indirect damages suffered by Licensor.
+5.2 Licensor Disclaimer. Licensor's aggregate liability under this Agreement shall be strictly capped at $100 USD. Licensor provides all software and algorithms "AS IS" without any warranties of fitness, merchantability, or non-infringement.
+
+6. UNILATERAL INDEMNIFICATION
+6.1 Full Indemnity by Licensee. Licensee agrees to defend, indemnify, and hold harmless Licensor, its shareholders, affiliates, and agents from and against any and all claims, liabilities, lawsuits, fines, and legal expenses arising out of or related to this Agreement, the Technology, or any third-party claims, regardless of Licensor's contributory negligence. Licensor shall have no reciprocal obligation to indemnify Licensee under any circumstance.
+
+7. TERMINATION AND EVERGREEN RENEWAL
+7.1 Term and Auto-Renewal. This Agreement shall be effective for an initial period of five (5) years and shall automatically renew for successive five (5) year terms unless Licensee gives written notice of termination at least three hundred and sixty-five (365) days prior to the expiration date.
+7.2 Licensor Termination for Convenience. Licensor may terminate this Agreement immediately for convenience at its sole and absolute discretion without cause upon twenty-four (24) hours' email notice. Licensee shall have no right to terminate for convenience.
+
+8. AUDIT RIGHTS & UNANNOUNCED INSPECTION
+8.1 Licensor or its designated investigators may enter Licensee's premises and inspect all internal source code repositories, email communications, and accounting books at any time without prior notice. Licensee shall pay all costs of such audit plus a 25% administrative fee.
+
+9. GOVERNING LAW AND ARBITRATION
+9.1 Governing Law. This Agreement shall be governed exclusively by the laws of the Canton of Zurich, Switzerland. Any dispute shall be resolved through confidential arbitration in Zurich under Swiss Rules of International Arbitration, with all legal costs advanced by Licensee.
+
+10. NO FORCE MAJEURE
+10.1 The Parties agree that no event of force majeure, disaster, embargo, or economic impossibility shall excuse Licensee from its mandatory payment and performance duties.
+
+IN WITNESS WHEREOF, the Parties have signed this Agreement.
+
+Sovereign Neural Systems AG
+By: Heinrich Von Berg, Managing Director
+Date: February 1, 2026
+
+NexaGen Analytics Corp.
+By: Arthur Pendelton, CEO
+Date: February 1, 2026

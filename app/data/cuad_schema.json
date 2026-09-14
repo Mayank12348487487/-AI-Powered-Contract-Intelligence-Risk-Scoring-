@@ -1,0 +1,412 @@
+{
+  "cuad_version": "1.0",
+  "dataset_source": "Contract Understanding Atticus Dataset (CUAD)",
+  "total_categories": 41,
+  "categories": [
+    {
+      "id": "document_name",
+      "name": "Document Name",
+      "description": "The formal title or name of the agreement or contract.",
+      "importance": "Medium",
+      "risk_level_default": "Low",
+      "keywords": ["agreement", "contract", "master services", "non-disclosure", "license agreement", "statement of work", "memorandum"],
+      "mitigation_guidance": "Ensure document title accurately reflects the legal structure and obligations."
+    },
+    {
+      "id": "parties",
+      "name": "Parties",
+      "description": "The legal names and corporate forms of each contracting entity.",
+      "importance": "Essential",
+      "risk_level_default": "Medium",
+      "keywords": ["between", "by and between", "entered into by", "parties", "hereinafter referred to as", "client", "vendor", "contractor"],
+      "mitigation_guidance": "Verify full legal entity names, state of incorporation, and registered office addresses."
+    },
+    {
+      "id": "agreement_date",
+      "name": "Agreement Date",
+      "description": "The date when the contract was executed or signed.",
+      "importance": "High",
+      "risk_level_default": "Low",
+      "keywords": ["dated as of", "entered into on this", "execution date", "signed on"],
+      "mitigation_guidance": "Confirm agreement date matches signature block execution dates."
+    },
+    {
+      "id": "effective_date",
+      "name": "Effective Date",
+      "description": "The date upon which the rights and obligations under the agreement become enforceable.",
+      "importance": "Essential",
+      "risk_level_default": "Medium",
+      "keywords": ["effective date", "commencement date", "effective as of", "shall become effective"],
+      "mitigation_guidance": "Ensure effective date is clearly defined and does not apply retroactive liability without explicit agreement."
+    },
+    {
+      "id": "expiration_date",
+      "name": "Expiration Date",
+      "description": "The fixed calendar date or triggering event on which the initial term of the contract ends.",
+      "importance": "Essential",
+      "risk_level_default": "Medium",
+      "keywords": ["expiration date", "initial term shall expire", "terminate on", "end on", "anniversary of"],
+      "mitigation_guidance": "Avoid indefinite terms without clear termination mechanisms."
+    },
+    {
+      "id": "renewal_term",
+      "name": "Renewal Term",
+      "description": "Provisions governing automatic or optional extension of the contract term.",
+      "importance": "High",
+      "risk_level_default": "High",
+      "keywords": ["automatically renew", "renewal term", "successive periods", "auto-renewal", "evergreen", "extended automatically"],
+      "risk_triggers": ["auto-renew without easy opt-out", "price hike on renewal", "multi-year automatic extension"],
+      "standard_safe_clause": "This Agreement shall renew only upon the mutual written agreement of both Parties executed at least thirty (30) days prior to the expiration of the current Term.",
+      "mitigation_guidance": "Flag evergreen automatic renewals. Mandate written mutual consent or minimum 30-60 day non-renewal notice window."
+    },
+    {
+      "id": "notice_period_to_terminate_renewal",
+      "name": "Notice Period To Terminate Renewal",
+      "description": "The required notice timeframe prior to the expiration date to prevent automatic renewal.",
+      "importance": "High",
+      "risk_level_default": "High",
+      "keywords": ["prior written notice", "written notice of non-renewal", "days prior to renewal", "days before expiration", "terminate auto-renewal"],
+      "risk_triggers": ["notice period < 15 days", "notice period > 90 days with auto-lockin"],
+      "mitigation_guidance": "Maintain a 30 to 60-day notice window to avoid accidental lock-in."
+    },
+    {
+      "id": "governing_law",
+      "name": "Governing Law",
+      "description": "The jurisdiction whose laws govern the interpretation and enforcement of the contract.",
+      "importance": "Essential",
+      "risk_level_default": "Medium",
+      "keywords": ["governed by", "construed in accordance with", "laws of the state of", "jurisdiction", "exclusive venue", "courts located in"],
+      "risk_triggers": ["foreign unfavorable jurisdiction", "inconvenient forum", "mandatory arbitration without appeal"],
+      "standard_safe_clause": "This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to its conflict of law principles.",
+      "mitigation_guidance": "Align governing law with company standard jurisdictions (e.g. Delaware, New York, England & Wales)."
+    },
+    {
+      "id": "most_favored_nation",
+      "name": "Most Favored Nation (MFN)",
+      "description": "A clause requiring the vendor to give the customer pricing/terms equal to or better than those offered to any other customer.",
+      "importance": "Medium",
+      "risk_level_default": "High",
+      "keywords": ["most favored customer", "most favored nation", "mfn", "pricing no less favorable", "lowest price offered to any third party"],
+      "risk_triggers": ["strict MFN obligation on supplier without volume parity"],
+      "mitigation_guidance": "If vendor, resist MFN clauses as they restrict commercial pricing flexibility and create audit exposure."
+    },
+    {
+      "id": "non_compete",
+      "name": "Non-Compete",
+      "description": "Restrictions on a party's ability to engage in competing business, serve certain clients, or operate in specific territories.",
+      "importance": "Essential",
+      "risk_level_default": "Critical",
+      "keywords": ["shall not engage in", "competing business", "non-compete", "covenant not to compete", "competitive activities", "restricted territory", "direct or indirect competition"],
+      "risk_triggers": ["duration > 12 months", "global or undefined territory", "broad definition of competing business"],
+      "standard_safe_clause": "Neither Party shall be restricted from conducting its general business or providing services to other clients, provided confidential information is not disclosed or utilized.",
+      "mitigation_guidance": "Strike broad non-competes. If unavoidable, limit strictly to direct named competitors, narrow geographic scope, and max 6-12 months."
+    },
+    {
+      "id": "exclusivity",
+      "name": "Exclusivity",
+      "description": "Commitment granting exclusive rights to supply, distribute, or purchase goods/services.",
+      "importance": "High",
+      "risk_level_default": "High",
+      "keywords": ["exclusive supplier", "exclusive right", "sole and exclusive", "shall not purchase from any other", "exclusivity"],
+      "risk_triggers": ["unilateral exclusivity without minimum revenue guarantees"],
+      "mitigation_guidance": "Condition exclusivity on aggressive minimum purchase thresholds and permit termination of exclusivity upon shortfall."
+    },
+    {
+      "id": "no_solicit_of_employees",
+      "name": "No-Solicit Of Employees",
+      "description": "Restriction preventing a party from actively recruiting, soliciting, or hiring the other party's staff.",
+      "importance": "Medium",
+      "risk_level_default": "Medium",
+      "keywords": ["shall not solicit", "solicit for employment", "hire or entice away", "no-solicit of employees", "recruit any employee"],
+      "risk_triggers": ["duration > 2 years", "restriction extends to general job postings"],
+      "standard_safe_clause": "During the term and for one (1) year thereafter, neither Party shall directly solicit the other Party's personnel who performed under this Agreement, excluding general public job advertisements.",
+      "mitigation_guidance": "Include standard carve-outs for general job solicitations and bona fide job board applications."
+    },
+    {
+      "id": "no_solicit_of_customers",
+      "name": "No-Solicit Of Customers",
+      "description": "Restrictions prohibiting a party from soliciting or diverting the other party's customers or clients.",
+      "importance": "High",
+      "risk_level_default": "High",
+      "keywords": ["shall not solicit any customer", "divert business", "solicit clients of", "customer non-solicitation"],
+      "risk_triggers": ["duration > 24 months", "extends to customers known prior to relationship"],
+      "mitigation_guidance": "Ensure non-solicitation only applies to customers directly introduced or engaged during project scope."
+    },
+    {
+      "id": "competitive_restriction_exception",
+      "name": "Competitive Restriction Exception",
+      "description": "Carve-outs explicitly permitting certain competitive or pre-existing lines of business.",
+      "importance": "Medium",
+      "risk_level_default": "Low",
+      "keywords": ["notwithstanding the foregoing", "shall not prevent", "permitted activities", "pre-existing business", "carve-out from non-compete"],
+      "mitigation_guidance": "Preserve existing product roadmaps and customer bases via explicit carve-outs."
+    },
+    {
+      "id": "no_hire",
+      "name": "No-Hire",
+      "description": "Strict prohibition against employing or contracting with the other party's staff even if unprompted.",
+      "importance": "Medium",
+      "risk_level_default": "Medium",
+      "keywords": ["shall not hire", "refrain from employing", "no-hire", "agrees not to employ"],
+      "mitigation_guidance": "Prefer non-solicitation over absolute no-hire provisions to avoid antitrust or labor law enforceability issues."
+    },
+    {
+      "id": "non_disparagement",
+      "name": "Non-Disparagement",
+      "description": "Obligation prohibiting either party from making defamatory or negative statements about the other.",
+      "importance": "Low",
+      "risk_level_default": "Low",
+      "keywords": ["non-disparagement", "shall not make disparaging", "negative statements", "defame or criticize", "harm reputation"],
+      "mitigation_guidance": "Ensure obligation is strictly mutual and contains standard carve-outs for legal testimony and regulatory filings."
+    },
+    {
+      "id": "termination_for_convenience",
+      "name": "Termination For Convenience",
+      "description": "Right of a party to terminate the contract at will without showing breach or fault.",
+      "importance": "Essential",
+      "risk_level_default": "High",
+      "keywords": ["terminate for convenience", "terminate without cause", "at any time upon", "convenience upon written notice", "terminate at will"],
+      "risk_triggers": ["unilateral right held only by counterparty", "short notice period < 30 days without pro-rata refund"],
+      "standard_safe_clause": "Either Party may terminate this Agreement for convenience at any time upon thirty (30) days' prior written notice to the other Party.",
+      "mitigation_guidance": "Ensure termination for convenience is bilateral, requires 30-60 days written notice, and provides pro-rata refund/payment for work completed."
+    },
+    {
+      "id": "rofr_rofo_rofn",
+      "name": "Right of First Refusal / First Offer (ROFR/ROFO)",
+      "description": "Preferential right to match third-party offers or be offered assets/licenses before outside buyers.",
+      "importance": "Medium",
+      "risk_level_default": "Medium",
+      "keywords": ["right of first refusal", "right of first offer", "rofr", "rofo", "first right to purchase", "matching right"],
+      "mitigation_guidance": "Ensure response timelines are strictly limited (e.g., 10-15 business days) to avoid transaction paralysis."
+    },
+    {
+      "id": "change_of_control",
+      "name": "Change Of Control",
+      "description": "Provisions triggered when a party undergoes a merger, acquisition, majority share transfer, or asset sale.",
+      "importance": "High",
+      "risk_level_default": "High",
+      "keywords": ["change of control", "merger or acquisition", "sale of substantially all assets", "transfer of voting control", "ownership change"],
+      "risk_triggers": ["immediate termination on change of control", "penalty fees triggered by acquisition"],
+      "mitigation_guidance": "Carve out internal reorganizations and require termination right only if acquirer is a direct direct competitor."
+    },
+    {
+      "id": "anti_assignment",
+      "name": "Anti-Assignment",
+      "description": "Prohibition against assigning rights or delegating duties under the agreement to third parties.",
+      "importance": "High",
+      "risk_level_default": "Medium",
+      "keywords": ["shall not assign", "assignment without consent", "neither party may assign", "successors and permitted assigns", "prior written consent to assign"],
+      "risk_triggers": ["absolute bar on assignment even in M&A or corporate restructuring"],
+      "standard_safe_clause": "Neither Party may assign this Agreement without prior written consent, except to an affiliate or in connection with a merger, acquisition, or sale of substantially all assets.",
+      "mitigation_guidance": "Always include carve-out allowing assignment to affiliates or M&A successor entities without consent."
+    },
+    {
+      "id": "revenue_profit_sharing",
+      "name": "Revenue / Profit Sharing",
+      "description": "Obligation to share gross revenues, net profits, royalties, or milestone earnings.",
+      "importance": "Medium",
+      "risk_level_default": "Medium",
+      "keywords": ["revenue share", "profit sharing", "percentage of gross revenue", "royalty calculation", "net proceeds"],
+      "mitigation_guidance": "Clearly define 'Net Revenue' and deduct allowable expenses, returns, taxes, and shipping."
+    },
+    {
+      "id": "price_restriction",
+      "name": "Price Restriction",
+      "description": "Caps or floors on pricing adjustments, inflationary indexation, or resale pricing.",
+      "importance": "Medium",
+      "risk_level_default": "Medium",
+      "keywords": ["price increase cap", "cpi adjustment", "shall not increase prices by more than", "price ceiling", "fixed pricing"],
+      "mitigation_guidance": "Ensure annual price escalation indexation (CPI + 3-5%) is permitted in long-term contracts."
+    },
+    {
+      "id": "minimum_commitment",
+      "name": "Minimum Commitment",
+      "description": "Minimum financial or volume purchase obligation regardless of actual usage or consumption.",
+      "importance": "High",
+      "risk_level_default": "High",
+      "keywords": ["minimum commitment", "take or pay", "minimum spend", "minimum purchase quantity", "guaranteed minimum"],
+      "risk_triggers": ["take-or-pay clauses with high financial penalties upon shortfall"],
+      "mitigation_guidance": "Avoid harsh take-or-pay penalties; tie commitments to graduated tier discounts instead."
+    },
+    {
+      "id": "volume_restriction",
+      "name": "Volume Restriction",
+      "description": "Limits on transaction volume, API requests, user seats, or processing bandwidth.",
+      "importance": "Low",
+      "risk_level_default": "Low",
+      "keywords": ["volume limit", "maximum transactions", "seat limit", "overage charges", "tier threshold"],
+      "mitigation_guidance": "Clearly define overage rates and ensure grace periods for temporary usage spikes."
+    },
+    {
+      "id": "ip_ownership_assignment",
+      "name": "IP Ownership Assignment",
+      "description": "Provisions transferring or assigning intellectual property created under or prior to the agreement.",
+      "importance": "Essential",
+      "risk_level_default": "Critical",
+      "keywords": ["assigns all right title and interest", "work made for hire", "exclusive ownership of work product", "all intellectual property created", "assignment of patents and copyrights"],
+      "risk_triggers": ["broad assignment of background/pre-existing IP", "unconditional work-for-hire without carve-outs"],
+      "standard_safe_clause": "Each Party retains all right, title, and interest in its pre-existing Intellectual Property. Customer owns deliverables specifically created and paid for, excluding Provider's underlying platform and core IP.",
+      "mitigation_guidance": "Vigorously defend pre-existing IP and background technology. Limit customer assignments strictly to bespoke deliverables."
+    },
+    {
+      "id": "joint_ip_ownership",
+      "name": "Joint IP Ownership",
+      "description": "Clauses assigning shared intellectual property rights to newly created technology.",
+      "importance": "High",
+      "risk_level_default": "High",
+      "keywords": ["jointly own", "tenants in common", "joint intellectual property", "shared ip rights", "co-ownership"],
+      "risk_triggers": ["joint ownership without clear commercial exploitation or licensing rules"],
+      "mitigation_guidance": "Avoid joint IP ownership due to jurisdictional exploitation ambiguities; prefer sole ownership with cross-licensing."
+    },
+    {
+      "id": "license_grant",
+      "name": "License Grant",
+      "description": "Scope of rights granted to use software, documentation, trade secrets, or patents.",
+      "importance": "Essential",
+      "risk_level_default": "Medium",
+      "keywords": ["grants a non-exclusive", "limited license", "worldwide royalty-free license", "right to use", "license scope", "sublicensable"],
+      "risk_triggers": ["irrevocable, perpetual, royalty-free license granted for basic subscription"],
+      "standard_safe_clause": "Provider grants Customer a non-exclusive, non-transferable, revocable license to access and use the Service during the Term solely for internal business operations.",
+      "mitigation_guidance": "Ensure license is non-exclusive, non-transferable, and terminable upon material breach or non-payment."
+    },
+    {
+      "id": "non_transferable_license",
+      "name": "Non-Transferable License",
+      "description": "Restriction specifying that the granted license cannot be sublicensed or assigned.",
+      "importance": "Medium",
+      "risk_level_default": "Low",
+      "keywords": ["non-transferable", "non-sublicensable", "cannot transfer or assign license", "restricted license"],
+      "mitigation_guidance": "Standard protection for software vendors."
+    },
+    {
+      "id": "exclusivity_of_license",
+      "name": "Exclusivity Of License",
+      "description": "Grant of sole and exclusive exploitation rights in a defined field or market.",
+      "importance": "High",
+      "risk_level_default": "High",
+      "keywords": ["exclusive license", "sole license to exploit", "exclusively licensed to"],
+      "mitigation_guidance": "Ensure exclusive licenses carry minimum royalty performance targets."
+    },
+    {
+      "id": "cap_on_liability",
+      "name": "Cap On Liability",
+      "description": "Limitation establishing a maximum monetary ceiling on damages recoverable under the agreement.",
+      "importance": "Essential",
+      "risk_level_default": "Low",
+      "keywords": ["aggregate liability shall not exceed", "total liability capped at", "fees paid in the preceding", "limitation of liability", "cap on damages", "maximum liability"],
+      "risk_triggers": ["cap missing entirely", "cap set above 5x contract value", "super-caps for standard breaches"],
+      "standard_safe_clause": "In no event shall either Party's aggregate liability arising out of or related to this Agreement exceed the total fees paid by Customer in the twelve (12) months preceding the claim.",
+      "mitigation_guidance": "Ensure mutual liability cap is tied to 12 months fees paid. Avoid un-capped exposure."
+    },
+    {
+      "id": "unlimited_liability",
+      "name": "Unlimited Liability",
+      "description": "Carve-outs from liability caps creating infinite financial risk exposure.",
+      "importance": "Essential",
+      "risk_level_default": "Critical",
+      "keywords": ["unlimited liability", "no limitation of liability shall apply to", "uncapped damages", "shall not be subject to any cap", "liability is not limited"],
+      "risk_triggers": ["unlimited liability for data breach or IP claims without super-cap", "unilateral carve-outs"],
+      "mitigation_guidance": "Restrict uncapped liabilities strictly to willful misconduct, gross negligence, and death/personal injury."
+    },
+    {
+      "id": "liquidated_damages",
+      "name": "Liquidated Damages",
+      "description": "Pre-agreed financial penalties payable upon breach or milestone delay.",
+      "importance": "High",
+      "risk_level_default": "High",
+      "keywords": ["liquidated damages", "agreed penalty sum", "stipulated damages", "penalty per day of delay", "pre-estimated damages"],
+      "risk_triggers": ["disproportionately high daily liquidated damages without overall cap"],
+      "mitigation_guidance": "Ensure liquidated damages are sole and exclusive remedy for delay and subject to overall aggregate cap (5-10% of value)."
+    },
+    {
+      "id": "warranty_duration",
+      "name": "Warranty Duration",
+      "description": "The time period during which product/service warranties remain valid.",
+      "importance": "Medium",
+      "risk_level_default": "Medium",
+      "keywords": ["warranty period", "warranted for a period of", "warranty duration", "days from delivery", "as-is disclaimer"],
+      "mitigation_guidance": "Standard software warranty is 30-90 days from delivery or acceptance."
+    },
+    {
+      "id": "insurance",
+      "name": "Insurance",
+      "description": "Mandatory commercial liability, cyber risk, or errors & omissions insurance policies.",
+      "importance": "Medium",
+      "risk_level_default": "Medium",
+      "keywords": ["commercial general liability", "maintain insurance", "errors and omissions", "cyber liability insurance", "additional insured"],
+      "risk_triggers": ["excessive insurance limits >$10M for small contracts", "waiver of subrogation required without justification"],
+      "mitigation_guidance": "Verify insurance coverage requirements align with existing company policy limits."
+    },
+    {
+      "id": "covenant_not_to_sue",
+      "name": "Covenant Not To Sue",
+      "description": "Agreement by a party promising not to initiate litigation or assert patent/IP claims.",
+      "importance": "Medium",
+      "risk_level_default": "High",
+      "keywords": ["covenants not to sue", "shall not commence any action", "waives right to sue", "covenant not to assert"],
+      "mitigation_guidance": "Ensure covenant not to sue does not waive rights to enforce confidentiality or payment terms."
+    },
+    {
+      "id": "third_party_beneficiary",
+      "name": "Third Party Beneficiary",
+      "description": "Provisions granting or disclaiming rights to individuals or entities not party to the agreement.",
+      "importance": "Low",
+      "risk_level_default": "Low",
+      "keywords": ["third party beneficiaries", "no third-party rights", "shall not confer any rights upon any person other than"],
+      "standard_safe_clause": "This Agreement is solely for the benefit of the Parties hereto and does not confer any rights or remedies upon any third party.",
+      "mitigation_guidance": "Include standard disclaimer disclaiming all third-party beneficiary rights."
+    },
+    {
+      "id": "audit_rights",
+      "name": "Audit Rights",
+      "description": "Right of a party or independent auditor to inspect books, records, data facilities, or source code.",
+      "importance": "High",
+      "risk_level_default": "High",
+      "keywords": ["right to audit", "inspect books and records", "independent auditor", "audit at customer expense", "conduct an audit"],
+      "risk_triggers": ["audits permitted without prior notice", "vendor pays for audit regardless of discrepancy"],
+      "standard_safe_clause": "Customer may audit Provider's compliance once per year upon at least thirty (30) days' prior written notice during normal business hours.",
+      "mitigation_guidance": "Limit audits to once per year, during normal business hours, upon 30 days notice, subject to confidentiality."
+    },
+    {
+      "id": "uncapped_liability",
+      "name": "Uncapped Liability",
+      "description": "Clauses explicitly removing liability limits for specific categories of breach.",
+      "importance": "Essential",
+      "risk_level_default": "Critical",
+      "keywords": ["shall be uncapped", "not subject to limitation of liability", "no monetary limit shall apply", "unlimited indemnity"],
+      "risk_triggers": ["uncapped indemnification for indirect damages or lost profits"],
+      "mitigation_guidance": "Require super-caps (e.g. 2x-3x contract value) instead of unlimited liability for data protection or IP indemnification."
+    },
+    {
+      "id": "force_majeure",
+      "name": "Force Majeure",
+      "description": "Excuse from contractual performance due to unforeseen events beyond reasonable control.",
+      "importance": "Essential",
+      "risk_level_default": "Low",
+      "keywords": ["force majeure", "acts of god", "war, terrorism, riot", "pandemic, epidemic", "beyond reasonable control", "excused from performance"],
+      "risk_triggers": ["force majeure missing entirely", "counterparty excused from payment obligations"],
+      "standard_safe_clause": "Neither Party shall be liable for delay or failure in performance resulting from acts beyond reasonable control (acts of God, natural disasters, war, pandemics), provided written notice is promptly given.",
+      "mitigation_guidance": "Ensure payment obligations are explicitly excluded from force majeure relief."
+    },
+    {
+      "id": "mutual_indemnification",
+      "name": "Mutual Indemnification",
+      "description": "Both parties agreeing to defend, indemnify, and hold harmless the other from third-party claims.",
+      "importance": "Essential",
+      "risk_level_default": "Low",
+      "keywords": ["each party shall indemnify", "mutually defend and hold harmless", "mutual indemnity", "indemnify, defend, and hold harmless the other party"],
+      "standard_safe_clause": "Each Party shall defend, indemnify, and hold harmless the other Party against third-party claims arising from gross negligence, willful misconduct, or IP infringement.",
+      "mitigation_guidance": "Mutual indemnification is the gold standard for commercial equity."
+    },
+    {
+      "id": "unilateral_indemnification",
+      "name": "Unilateral Indemnification",
+      "description": "One-sided obligation where only one party indemnifies the other with no reciprocal protection.",
+      "importance": "Essential",
+      "risk_level_default": "Critical",
+      "keywords": ["vendor shall indemnify customer", "contractor agrees to defend and indemnify client", "solely indemnifies", "hold harmless harmless from all claims"],
+      "risk_triggers": ["one-sided indemnity with broad consequential damage coverage"],
+      "mitigation_guidance": "Convert unilateral indemnity into a balanced mutual indemnity with clear procedural claim conditions."
+    }
+  ]
+}

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Intelligence & Risk Scoring AI | CUAD NLP Studio</title>
+    <meta name="description" content="AI-Powered Legal Contract Intelligence, CUAD 41 Clause Extraction, Named Entity Recognition, Risk Scoring & Anomaly Detection.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="theme-dark">
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+        <div class="header-left">
+            <div class="brand-logo">
+                <div class="logo-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <span class="sparkle-dot"></span>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">Contract<span class="accent-text">Intelligence</span></span>
+                    <span class="brand-badge">CUAD NLP • 41 CATEGORIES</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-center">
+            <!-- Sample Loader Dropdown -->
+            <div class="sample-selector-wrap">
+                <span class="sample-label">⚡ 1-Click Samples:</span>
+                <select id="sampleSelect" class="custom-select" onchange="window.app.loadSample(this.value)">
+                    <option value="" disabled selected>Select a Curated Contract...</option>
+                    <option value="saas_master_agreement">📘 SaaS Master Agreement (Medium Risk)</option>
+                    <option value="mutual_nda">📗 Mutual NDA (Low Risk - Safe)</option>
+                    <option value="ip_licensing_unfavorable">📕 IP Licensing (Critical Risk - Unfavorable)</option>
+                    <option value="vendor_supply_contract">📙 Vendor Supply Contract (High Risk)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <button id="uploadBtn" class="btn btn-secondary" onclick="window.app.triggerUploadModal()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                Upload Contract
+            </button>
+            <button id="exportPdfBtn" class="btn btn-primary" onclick="window.app.exportReport('pdf')" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Export Audit PDF
+            </button>
+            <button id="themeToggleBtn" class="icon-btn" onclick="window.app.toggleTheme()" title="Toggle Dark/Light Mode">
+                <span id="themeIcon">☀️</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-layout">
+        <!-- Top Executive KPI Banner -->
+        <section id="executiveBanner" class="executive-banner glass-panel">
+            <div class="risk-meter-container">
+                <div class="circular-progress">
+                    <svg viewBox="0 0 120 120" class="gauge-svg">
+                        <circle class="gauge-bg" cx="60" cy="60" r="50"></circle>
+                        <circle id="gaugeFill" class="gauge-fill" cx="60" cy="60" r="50"></circle>
+                    </svg>
+                    <div class="gauge-content">
+                        <span id="riskScoreVal" class="gauge-score">--</span>
+                        <span class="gauge-max">/ 100</span>
+                    </div>
+                </div>
+                <div class="risk-meta">
+                    <div class="risk-tag-wrap">
+                        <span id="riskTierBadge" class="badge badge-neutral">Awaiting Document</span>
+                    </div>
+                    <div class="risk-title">Composite Legal Risk Index</div>
+                    <div id="riskTierDesc" class="risk-subtext">Upload a contract or select a CUAD sample above to start inference.</div>
+                </div>
+            </div>
+
+            <!-- Key Fact Chips -->
+            <div class="kpi-chips-grid">
+                <div class="kpi-chip">
+                    <div class="chip-icon">🏢</div>
+                    <div class="chip-content">
+                        <div class="chip-label">Contracting Parties</div>
+                        <div id="kpiParties" class="chip-value" title="Parties">None Identified</div>
+                    </div>
+                </div>
+                <div class="kpi-chip">
+                    <div class="chip-icon">⚖️</div>
+                    <div class="chip-content">
+                        <div class="chip-label">Governing Jurisdiction</div>
+                        <div id="kpiJurisdiction" class="chip-value">--</div>
+                    </div>
+                </div>
+                <div class="kpi-chip">
+                    <div class="chip-icon">📅</div>
+                    <div class="chip-content">
+                        <div class="chip-label">Effective & Expiration</div>
+                        <div id="kpiDates" class="chip-value">--</div>
+                    </div>
+                </div>
+                <div class="kpi-chip">
+                    <div class="chip-icon">🛡️</div>
+                    <div class="chip-content">
+                        <div class="chip-label">CUAD Detected / Anomalies</div>
+                        <div id="kpiAnomalies" class="chip-value">-- Categories</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Pillars Breakdown -->
+            <div class="risk-pillars-container">
+                <div class="pillar-row">
+                    <div class="pillar-info">
+                        <span>Missing Protections</span>
+                        <span id="pillar1Score">0 / 35</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div id="pillar1Bar" class="progress-bar-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="pillar-row">
+                    <div class="pillar-info">
+                        <span>Unfavorable Terms & Anomalies</span>
+                        <span id="pillar2Score">0 / 35</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div id="pillar2Bar" class="progress-bar-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="pillar-row">
+                    <div class="pillar-info">
+                        <span>Operational & Lock-in Risk</span>
+                        <span id="pillar3Score">0 / 20</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div id="pillar3Bar" class="progress-bar-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="pillar-row">
+                    <div class="pillar-info">
+                        <span>Ambiguity & Boilerplate Drift</span>
+                        <span id="pillar4Score">0 / 10</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div id="pillar4Bar" class="progress-bar-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Studio Split View -->
+        <div class="studio-workspace">
+            <!-- Left Workspace: Document Viewer with Synchronized Highlights -->
+            <div class="workspace-left glass-panel">
+                <div class="panel-header">
+                    <div class="panel-title-wrap">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        <span id="docViewTitle">Document Clause Viewer</span>
+                        <span id="docSegmentCount" class="count-badge">0 Clauses</span>
+                    </div>
+                    <div class="panel-actions">
+                        <!-- Highlight filter dropdown -->
+                        <select id="highlightFilter" class="custom-select-small" onchange="window.app.filterHighlights(this.value)">
+                            <option value="ALL">Show All Highlights</option>
+                            <option value="HIGH_RISK">⚠️ Flagged Risk Only</option>
+                            <option value="liability">Liability & Indemnity</option>
+                            <option value="non_compete">Non-Compete & Restrictive</option>
+                            <option value="termination">Termination & Notice</option>
+                            <option value="ip">Intellectual Property</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="documentContainer" class="document-content-scrollable">
+                    <div class="empty-state">
+                        <div class="empty-icon">📄</div>
+                        <div class="empty-title">No Document Loaded</div>
+                        <div class="empty-desc">Choose a sample contract from the top header or upload your own PDF/DOCX to view interactive highlighted legal clauses.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Workspace: Intelligence Tabs -->
+            <div class="workspace-right glass-panel">
+                <!-- Tabs Header -->
+                <div class="tabs-nav">
+                    <button class="tab-btn active" onclick="window.app.switchTab('riskTab')">
+                        <span class="tab-icon">⚠️</span> Risk & Redlines
+                    </button>
+                    <button class="tab-btn" onclick="window.app.switchTab('entitiesTab')">
+                        <span class="tab-icon">🏢</span> Key Entities
+                    </button>
+                    <button class="tab-btn" onclick="window.app.switchTab('cuadTab')">
+                        <span class="tab-icon">📋</span> CUAD Taxonomy
+                    </button>
+                    <button class="tab-btn" onclick="window.app.switchTab('chatTab')">
+                        <span class="tab-icon">💬</span> Legal Q&A Chat
+                    </button>
+                    <button class="tab-btn" onclick="window.app.switchTab('compareTab')">
+                        <span class="tab-icon">⚖️</span> Redline Compare
+                    </button>
+                </div>
+
+                <!-- Tab 1: Risk & Redlines -->
+                <div id="riskTab" class="tab-pane active">
+                    <div class="tab-inner-header">
+                        <div class="tab-title">High-Risk Language & Mitigation Checklist</div>
+                        <div class="tab-subtitle">Identified compliance vulnerabilities with suggested standard fallback language.</div>
+                    </div>
+                    <div id="anomaliesList" class="anomalies-list-container">
+                        <div class="empty-tab-hint">Load a contract to view high-risk triggers and negotiation redlines.</div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Entities & Key Terms -->
+                <div id="entitiesTab" class="tab-pane">
+                    <div class="tab-inner-header">
+                        <div class="tab-title">Extracted Legal Entities & Key Financials</div>
+                        <div class="tab-subtitle">Automatically extracted dates, parties, liability caps, and notice windows.</div>
+                    </div>
+                    <div id="entitiesContainer" class="entities-grid-container">
+                        <div class="empty-tab-hint">No entities extracted yet.</div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: CUAD 41 Taxonomy Breakdown -->
+                <div id="cuadTab" class="tab-pane">
+                    <div class="tab-inner-header">
+                        <div class="tab-title">CUAD 41 Categories Coverage Matrix</div>
+                        <div class="tab-subtitle">Benchmark analysis against the 41 Atticus legal categories.</div>
+                    </div>
+                    <div class="cuad-filters-bar">
+                        <button class="btn-pill active" onclick="window.app.filterCuadList('ALL')">All (41)</button>
+                        <button class="btn-pill" onclick="window.app.filterCuadList('PRESENT')">Present in Doc</button>
+                        <button class="btn-pill" onclick="window.app.filterCuadList('MISSING')">Missing Essential</button>
+                    </div>
+                    <div id="cuadCategoriesList" class="cuad-list-container">
+                        <div class="empty-tab-hint">Loading CUAD taxonomy schema...</div>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Legal Q&A Assistant -->
+                <div id="chatTab" class="tab-pane chat-pane">
+                    <div class="tab-inner-header">
+                        <div class="tab-title">Conversational Legal Assistant</div>
+                        <div class="tab-subtitle">Ask plain English questions grounded in the contract text.</div>
+                    </div>
+                    
+                    <div class="quick-questions-bar">
+                        <button class="quick-q-pill" onclick="window.app.askPresetQuestion('What is the liability cap in this contract?')">Liability Cap?</button>
+                        <button class="quick-q-pill" onclick="window.app.askPresetQuestion('Is there a non-compete clause?')">Non-Compete?</button>
+                        <button class="quick-q-pill" onclick="window.app.askPresetQuestion('What is the notice period for non-renewal?')">Notice Period?</button>
+                        <button class="quick-q-pill" onclick="window.app.askPresetQuestion('Which governing law applies?')">Governing Law?</button>
+                    </div>
+
+                    <div id="chatMessages" class="chat-messages-scroll">
+                        <div class="chat-bubble bot">
+                            <div class="bot-avatar">⚖️</div>
+                            <div class="chat-text">
+                                Hello! I am your AI Contract Intelligence Assistant. Ask me anything about this agreement or click one of the quick questions above.
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="chatForm" class="chat-input-row" onsubmit="window.app.sendChatMessage(event)">
+                        <input id="chatInput" type="text" placeholder="Ask a question about this contract..." autocomplete="off" />
+                        <button type="submit" class="btn btn-primary chat-send-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Tab 5: Side-by-Side Comparison -->
+                <div id="compareTab" class="tab-pane">
+                    <div class="tab-inner-header">
+                        <div class="tab-title">Contract Redline & Risk Comparison</div>
+                        <div class="tab-subtitle">Compare current contract with another draft to highlight risk shifts and altered terms.</div>
+                    </div>
+                    
+                    <div class="compare-selector-box">
+                        <div class="selector-field">
+                            <label>Base Contract (Contract A):</label>
+                            <input id="compareDocA" type="text" readonly class="custom-input-readonly" value="Current Document" />
+                        </div>
+                        <div class="selector-field">
+                            <label>Compare Against (Contract B):</label>
+                            <select id="compareDocBSelect" class="custom-select">
+                                <option value="mutual_nda">📗 Mutual NDA</option>
+                                <option value="saas_master_agreement">📘 SaaS Master Agreement</option>
+                                <option value="ip_licensing_unfavorable">📕 IP Licensing Unfavorable</option>
+                                <option value="vendor_supply_contract">📙 Vendor Supply Contract</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-secondary" onclick="window.app.runComparison()">Run Diff Analysis</button>
+                    </div>
+
+                    <div id="compareResultsContainer" class="compare-results-container">
+                        <div class="empty-tab-hint">Select a comparison contract and click "Run Diff Analysis".</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card glass-panel">
+            <div class="modal-header">
+                <div class="modal-title">Upload Legal Contract</div>
+                <button class="modal-close" onclick="window.app.closeUploadModal()">✕</button>
+            </div>
+            
+            <div class="modal-tabs">
+                <button id="modalTabFile" class="modal-tab-btn active" onclick="window.app.switchUploadType('file')">File Upload (PDF/DOCX/TXT)</button>
+                <button id="modalTabPaste" class="modal-tab-btn" onclick="window.app.switchUploadType('paste')">Paste Plain Text</button>
+            </div>
+
+            <!-- File Drag & Drop Zone -->
+            <div id="fileUploadSection" class="upload-dropzone" onclick="document.getElementById('fileInput').click()">
+                <input id="fileInput" type="file" accept=".pdf,.docx,.doc,.txt,.png,.jpg" style="display: none;" onchange="window.app.handleFileSelected(this.files[0])" />
+                <div class="drop-icon">📁</div>
+                <div class="drop-title">Drag & drop contract files here, or <span class="highlight">browse</span></div>
+                <div class="drop-subtitle">Supports PDF, Word (.docx), Scanned Images (OCR), and Plain Text (.txt)</div>
+                <div id="selectedFileName" class="selected-file-badge" style="display: none;"></div>
+            </div>
+
+            <!-- Paste Text Area -->
+            <div id="pasteTextSection" class="paste-text-section" style="display: none;">
+                <input id="pasteContractName" type="text" class="custom-input" placeholder="Contract Title (e.g. Master Services Agreement v2)" style="margin-bottom: 10px;" />
+                <textarea id="pasteContractText" class="custom-textarea" rows="10" placeholder="Paste full contract text here..."></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="window.app.closeUploadModal()">Cancel</button>
+                <button id="submitUploadBtn" class="btn btn-primary" onclick="window.app.submitContractUpload()">Analyze Contract</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inspector Slide-over Drawer for Clicked Clause -->
+    <div id="clauseDrawer" class="clause-drawer glass-panel" style="display: none;">
+        <div class="drawer-header">
+            <div class="drawer-title-wrap">
+                <span class="drawer-badge" id="drawerCategoryBadge">Clause Analysis</span>
+                <div id="drawerHeading" class="drawer-heading">Section Title</div>
+            </div>
+            <button class="drawer-close" onclick="window.app.closeDrawer()">✕</button>
+        </div>
+        <div class="drawer-body">
+            <div class="drawer-section">
+                <div class="drawer-subheading">CUAD Classification & Confidence</div>
+                <div id="drawerCuadInfo" class="cuad-info-box">--</div>
+            </div>
+            <div class="drawer-section">
+                <div class="drawer-subheading">Risk Assessment & Rationale</div>
+                <div id="drawerRiskInfo" class="risk-info-box">--</div>
+            </div>
+            <div class="drawer-section">
+                <div class="drawer-subheading">Recommended Standard Redline</div>
+                <div id="drawerRedlineBox" class="redline-box">--</div>
+            </div>
+            <div class="drawer-section">
+                <div class="drawer-subheading">Clause Full Text</div>
+                <div id="drawerClauseText" class="clause-raw-text">--</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="toast" style="display: none;"></div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

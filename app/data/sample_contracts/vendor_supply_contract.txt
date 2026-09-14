@@ -1,0 +1,54 @@
+COMMERCIAL SUPPLY AND MANUFACTURING AGREEMENT
+
+This Commercial Supply and Manufacturing Agreement ("Agreement") is executed and made effective as of March 1, 2026 ("Effective Date"), by and between Precision Dynamics Manufacturing Corp., an Ohio corporation located at 800 Industrial Parkway, Cleveland, OH 44114 ("Supplier"), and Apex Consumer Goods International Inc., a Delaware corporation located at 250 Fifth Avenue, New York, NY 10001 ("Buyer").
+
+RECITALS
+Buyer wishes to procure custom machined components manufactured by Supplier, and Supplier desires to manufacture and supply such components subject to the terms and specifications herein.
+
+1. SUPPLY OBLIGATIONS AND MINIMUM COMMITMENTS
+1.1 Supply. Supplier shall manufacture and supply components in accordance with Buyer's purchase orders and product specifications.
+1.2 Minimum Volume Commitment. Buyer commits to purchase a minimum volume of 500,000 units annually ("Minimum Volume").
+
+2. TERM AND RENEWAL NOTICE
+2.1 Term. The term of this Agreement shall commence on the Effective Date and continue for a period of three (3) years ("Initial Term"), expiring on February 28, 2029.
+2.2 Renewal. This Agreement will automatically renew for successive two (2) year terms unless either Party provides written notice of non-renewal at least sixty (60) days prior to the expiration date.
+
+3. PRICING, PAYMENT AND INVOICING
+3.1 Contract Price. Pricing is fixed at $45.00 per unit for Year 1, subject to annual indexation based on the Producer Price Index (PPI) not to exceed 4% per annum.
+3.2 Payment Terms. Payment shall be made within Net 45 days from receipt of a verified invoice.
+
+4. WARRANTIES AND INSPECTION
+4.1 Warranty Duration. Supplier warrants that all goods delivered shall be free from defects in material and workmanship for a period of twelve (12) months from delivery date.
+4.2 Remedy. Supplier shall, at its option, repair or replace non-conforming items within thirty (30) days of notice.
+
+5. LIQUIDATED DAMAGES FOR DELAY
+5.1 Late Delivery Penalties. If Supplier fails to deliver conforming goods by the agreed delivery date, Supplier shall pay liquidated damages equal to 0.5% of the purchase order value per day of unexcused delay, capped at an aggregate maximum of 10% of the affected order value.
+
+6. LIMITATION OF LIABILITY
+6.1 Aggregate Cap. In no event shall either Party's total liability under this Agreement exceed $1,500,000 USD or the total fees paid in the preceding twelve (12) months, whichever is greater.
+6.2 Exclusion. Neither Party shall be liable for indirect, incidental, or lost profit damages.
+
+7. INDEMNIFICATION
+7.1 Mutual Indemnity. Each Party agrees to indemnify, defend, and hold harmless the other Party from any third-party claims arising out of bodily injury, property damage, or gross negligence resulting from the indemnifying Party's performance.
+
+8. TERMINATION FOR CAUSE
+8.1 Default. Either Party may terminate this Agreement upon forty-five (45) days' written notice if the other Party commits a material breach and fails to cure such breach within the notice period.
+
+9. FORCE MAJEURE
+9.1 Excused Delays. Neither Party shall be deemed in breach of this Agreement for delays caused by fires, floods, strikes, embargoes, or government action beyond reasonable control, provided notice is sent within seven (7) days of occurrence.
+
+10. GOVERNING LAW & JURISDICTION
+10.1 Law. This Agreement shall be governed by and construed in accordance with the laws of the State of Ohio. The courts of Cuyahoga County, Ohio shall have exclusive jurisdiction.
+
+11. CONFIDENTIALITY
+11.1 Non-Disclosure. Both Parties agree to protect each other's proprietary manufacturing drawings and commercial pricing for a period of five (5) years following termination.
+
+IN WITNESS WHEREOF, the Parties have executed this Supply Agreement.
+
+Precision Dynamics Manufacturing Corp.
+By: Robert Vance, VP Operations
+Date: March 1, 2026
+
+Apex Consumer Goods International Inc.
+By: Catherine Miller, Chief Procurement Officer
+Date: March 1, 2026

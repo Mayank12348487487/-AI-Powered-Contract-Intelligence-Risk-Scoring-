@@ -1,0 +1,38 @@
+import pytest
+from app.core.ingestion import DocumentParser
+from app.core.ner_engine import ner_engine
+from app.core.clause_classifier import clause_classifier
+from app.core.risk_scorer import risk_engine
+
+def test_safe_mutual_nda_risk():
+    nda_text = """MUTUAL NON-DISCLOSURE AGREEMENT
+Effective as of January 10, 2026, by and between Company A Inc. ("Disclosing Party") and Company B LLC ("Receiving Party").
+1. Confidential Information shall be protected with reasonable care for a term of 2 years.
+2. Governing Law: State of Massachusetts.
+3. Neither party shall be liable for indirect damages.
+"""
+    parsed = DocumentParser.parse_file("nda.txt", nda_text.encode('utf-8'))
+    entities = ner_engine.extract_entities(nda_text)
+    enriched = clause_classifier.classify_document_segments(parsed["segments"])
+    
+    risk = risk_engine.evaluate_contract_risk(nda_text, enriched, entities)
+    assert risk["composite_score"] < 50
+    assert risk["risk_tier"] in ["LOW", "MEDIUM"]
+
+def test_critical_unfavorable_licensing_risk():
+    unfavorable_text = """UNFAVORABLE IP LICENSE AGREEMENT
+1. Licensee's liability shall be completely uncapped and unlimited.
+2. Licensee assigns all right, title, and interest in all background source code and pre-existing intellectual property.
+3. Licensee agrees to a 5-year global non-compete worldwide.
+4. Licensee agrees to defend, indemnify, and hold harmless Licensor regardless of contributory negligence.
+5. Licensor may terminate at its sole and absolute discretion without cause upon 24 hours notice.
+6. Licensor may inspect and audit premises at any time without prior notice.
+"""
+    parsed = DocumentParser.parse_file("unfavorable.txt", unfavorable_text.encode('utf-8'))
+    entities = ner_engine.extract_entities(unfavorable_text)
+    enriched = clause_classifier.classify_document_segments(parsed["segments"])
+    
+    risk = risk_engine.evaluate_contract_risk(unfavorable_text, enriched, entities)
+    assert risk["composite_score"] >= 70
+    assert risk["risk_tier"] in ["HIGH", "CRITICAL"]
+    assert len(risk["anomalies"]) >= 3

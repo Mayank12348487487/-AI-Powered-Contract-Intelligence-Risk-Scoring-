@@ -1,0 +1,66 @@
+MASTER SOFTWARE AS A SERVICE (SAAS) AGREEMENT
+
+This Master Software as a Service Agreement ("Agreement") is entered into and made effective as of October 15, 2025 ("Effective Date"), by and between CloudMatrix Technologies, Inc., a Delaware corporation with its principal place of business at 100 Innovation Way, San Francisco, CA 94105 ("Provider"), and Global Logistics Solutions LLC, a Texas limited liability company having offices at 450 Commerce Street, Austin, TX 78701 ("Customer"). Provider and Customer are individually referred to as a "Party" and collectively as the "Parties."
+
+RECITALS
+WHEREAS, Provider has developed a proprietary enterprise supply chain optimization platform known as CloudMatrix Intelligence; and
+WHEREAS, Customer desires to access and utilize said platform in accordance with the terms and subject to the conditions set forth in this Agreement.
+
+NOW, THEREFORE, in consideration of the mutual covenants herein contained, the Parties agree as follows:
+
+1. LICENSE GRANT & PERMITTED USE
+1.1 Subscription Grant. Subject to the terms of this Agreement, Provider hereby grants to Customer a non-exclusive, non-transferable, non-sublicensable, worldwide license to access and use the hosted CloudMatrix platform solely for Customer's internal business operations during the Term.
+1.2 Restrictions. Customer shall not: (a) reverse engineer, decompile, or disassemble the platform; (b) lease, distribute, or license access to any third party; or (c) attempt to circumvent any security controls.
+
+2. TERM AND AUTOMATIC RENEWAL
+2.1 Term. The initial term of this Agreement shall commence on the Effective Date and continue for a period of two (2) years ("Initial Term"), expiring on October 14, 2027 ("Expiration Date").
+2.2 Renewal Term. This Agreement shall automatically renew for successive one (1) year periods (each a "Renewal Term") unless either Party delivers written notice of non-renewal at least thirty (30) days prior to the expiration of the then-current term.
+
+3. FEES AND PAYMENT TERMS
+3.1 Subscription Fees. Customer shall pay the annual subscription fees of $120,000 USD within thirty (30) days of receiving an undisputed invoice (Net 30).
+3.2 Late Payments. Overdue balances shall accrue interest at the rate of 1.5% per month or the highest rate permitted by law.
+
+4. INTELLECTUAL PROPERTY RIGHTS
+4.1 Provider IP. Provider retains all right, title, and interest, including all Intellectual Property rights, in and to the platform, underlying algorithms, documentation, and enhancements.
+4.2 Customer Data. Customer retains sole ownership of all data, files, and information uploaded to the platform ("Customer Data").
+
+5. CONFIDENTIALITY & NON-DISCLOSURE
+5.1 Definition. "Confidential Information" means all non-public technical, business, or financial information disclosed by one Party to the other.
+5.2 Protection Obligations. The receiving Party agrees to hold Confidential Information in strict confidence using at least reasonable care for a period of three (3) years from disclosure.
+
+6. NON-SOLICITATION OF EMPLOYEES
+6.1 Non-Solicit. During the Term and for one (1) year following termination, neither Party shall directly solicit for employment any technical or executive employee of the other Party without prior written consent; provided that general public job advertisements shall not constitute a violation.
+
+7. LIMITATION OF LIABILITY
+7.1 Cap on Liability. In no event shall either Party's total aggregate liability arising out of or related to this Agreement exceed the total fees paid by Customer to Provider in the twelve (12) months preceding the incident giving rise to liability.
+7.2 Consequential Damages Waiver. To the maximum extent permitted by applicable law, neither Party shall be liable for indirect, punitive, special, or consequential damages, or loss of profits.
+
+8. INDEMNIFICATION
+8.1 Mutual Indemnification. Each Party shall defend, indemnify, and hold harmless the other Party, its officers, and directors against any third-party claims, damages, or liabilities arising from: (a) infringement of intellectual property rights; or (b) gross negligence or willful misconduct of the indemnifying Party.
+
+9. TERMINATION FOR CONVENIENCE & CAUSE
+9.1 Termination for Cause. Either Party may terminate this Agreement immediately upon written notice if the other Party materially breaches any provision and fails to cure such breach within thirty (30) days.
+9.2 Termination for Convenience. Customer may terminate this Agreement for convenience upon sixty (60) days' prior written notice to Provider, subject to payment for services rendered through the effective termination date.
+
+10. AUDIT RIGHTS
+10.1 Audit Scope. Customer may, upon thirty (30) days' prior written notice and not more than once per calendar year, engage an independent certified auditor to verify Provider's SOC 2 Type II compliance during standard business hours.
+
+11. FORCE MAJEURE
+11.1 Excused Performance. Neither Party shall be liable for any delay or failure in performance resulting from acts of God, natural disasters, war, acts of terrorism, civil unrest, or nationwide utility outages, provided prompt written notice is delivered.
+
+12. GOVERNING LAW & JURISDICTION
+12.1 Governing Law. This Agreement shall be governed by, and construed in accordance with, the laws of the State of Delaware, without regard to conflict of law principles. Any legal suit or proceeding shall be instituted exclusively in the federal or state courts located in New Castle County, Delaware.
+
+13. MISCELLANEOUS
+13.1 Entire Agreement. This Agreement constitutes the entire agreement between the Parties and supersedes all prior negotiations and representations.
+13.2 Assignment. Neither Party may assign this Agreement without prior written consent, except in connection with a merger, acquisition, or sale of substantially all assets.
+
+IN WITNESS WHEREOF, the Parties have executed this Master SaaS Agreement as of the Effective Date.
+
+CloudMatrix Technologies, Inc. (Provider)
+By: Marcus Vance, Chief Executive Officer
+Date: October 15, 2025
+
+Global Logistics Solutions LLC (Customer)
+By: Elena Rostova, VP of Procurement
+Date: October 15, 2025

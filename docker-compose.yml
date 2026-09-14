@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  contract-intelligence:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: contract-intelligence-nlp:latest
+    container_name: contract_nlp_platform
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./exports:/app/exports
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DEBUG=False
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
