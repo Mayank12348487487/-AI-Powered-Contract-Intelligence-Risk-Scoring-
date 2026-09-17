@@ -1,11 +1,11 @@
-AI-Powered Contract Intelligence & Risk Scoring (NLP)
+# AI-Powered Contract Intelligence & Risk Scoring (NLP)
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688.svg)](https://fastapi.tiangolo.com/)
 [![CUAD Benchmark](https://img.shields.io/badge/Dataset-CUAD%2041%20Categories-orange.svg)](https://www.atticusprojectai.org/cuad)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/Tests-5%2F5%20Passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-15%2F15%20Passing-brightgreen.svg)]()
 
 A state-of-the-art NLP and Legal Intelligence platform designed for corporate counsel, procurement teams, and compliance officers. The platform automates contract review by ingesting multi-format legal documents (PDF, DOCX, TXT, OCR), extracting structured entities, classifying clauses across all **41 CUAD (Contract Understanding Atticus Dataset) categories**, computing a multi-dimensional **Risk Score (0–100)** with anomaly detection, and providing an interactive **Glassmorphic Web Studio** with semantic vector search, redline comparison, and downloadable audit reports.
 Built with a modular FastAPI backend and reusable NLP/risk-scoring components.
