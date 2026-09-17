@@ -27,3 +27,18 @@ def test_classify_indemnity():
     assert len(matches) > 0
     cat_ids = [m["category_id"] for m in matches]
     assert "mutual_indemnification" in cat_ids
+
+def test_classify_unlimited_liability():
+    text = "The Company's liability under this Agreement shall not be subject to any cap or limitation."
+    matches = clause_classifier.classify_clause(text)
+    assert len(matches) > 0
+    cat_ids = [m["category_id"] for m in matches]
+    assert "unlimited_liability" in cat_ids
+
+
+def test_classify_force_majeure():
+    text = "Neither Party shall be liable for failure caused by force majeure, including war, disaster, or other events beyond its reasonable control."
+    matches = clause_classifier.classify_clause(text)
+    assert len(matches) > 0
+    cat_ids = [m["category_id"] for m in matches]
+    assert "force_majeure" in cat_ids
