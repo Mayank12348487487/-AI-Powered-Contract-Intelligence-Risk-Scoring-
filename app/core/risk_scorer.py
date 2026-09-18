@@ -72,6 +72,22 @@ ANOMALY_PATTERNS = [
         "points": 14,
         "rationale": "Explicitly refuses relief for catastrophic events, acts of God, war, or natural disasters.",
         "recommended_redline": "Standard Force Majeure clause providing mutual relief for events beyond reasonable control."
+    },
+    {
+        "pattern": re.compile(r'(?:perpetual|irrevocable).*worldwide\s+license.*to.*(?:all\s+customer\s+data|confidential\s+data|proprietary\s+code)', re.IGNORECASE),
+        "category": "Perpetual & Irrevocable Data License",
+        "severity": "CRITICAL",
+        "points": 20,
+        "rationale": "Grants irrevocable perpetual rights to confidential data or proprietary assets surviving termination.",
+        "recommended_redline": "Licenses to customer data shall be non-exclusive, limited to the active contract term, and terminate immediately upon contract conclusion."
+    },
+    {
+        "pattern": re.compile(r'increase\s+(?:fees|pricing|rates)\s+at\s+any\s+time\s+without\s+notice|unilateral\s+price\s+increase', re.IGNORECASE),
+        "category": "Unilateral Price Increase Rights",
+        "severity": "HIGH",
+        "points": 12,
+        "rationale": "Permits counterparty to alter agreed pricing or rate cards arbitrarily without advance notice or exit rights.",
+        "recommended_redline": "Any fee adjustments shall occur not more than once per renewal term and require at least sixty (60) days prior written notice with right of termination."
     }
 ]
 

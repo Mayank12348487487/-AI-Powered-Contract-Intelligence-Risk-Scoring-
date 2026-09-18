@@ -26,7 +26,20 @@ class ContractComparator:
         ent_b = contract_b.get("entities", {})
 
         entity_diffs = []
-        
+
+        # Parties
+        parties_a_names = [p.get("name", "") for p in ent_a.get("parties", [])] if ent_a.get("parties") else []
+        parties_b_names = [p.get("name", "") for p in ent_b.get("parties", [])] if ent_b.get("parties") else []
+        str_a = ", ".join(parties_a_names) if parties_a_names else "Unspecified"
+        str_b = ", ".join(parties_b_names) if parties_b_names else "Unspecified"
+        if set(parties_a_names) != set(parties_b_names) and (parties_a_names or parties_b_names):
+            entity_diffs.append({
+                "field": "Contracting Parties",
+                "contract_a": str_a,
+                "contract_b": str_b,
+                "impact": "Discrepancy in identified contracting parties or corporate entities."
+            })
+
         # Governing Law
         law_a = ent_a.get("governing_law", {}).get("jurisdiction", "Unspecified") if ent_a.get("governing_law") else "Unspecified"
         law_b = ent_b.get("governing_law", {}).get("jurisdiction", "Unspecified") if ent_b.get("governing_law") else "Unspecified"
@@ -47,6 +60,17 @@ class ContractComparator:
                 "contract_a": eff_a,
                 "contract_b": eff_b,
                 "impact": "Effective timeline shift."
+            })
+
+        # Expiration Date
+        exp_a = ent_a.get("expiration_date", {}).get("value", "N/A") if ent_a.get("expiration_date") else "N/A"
+        exp_b = ent_b.get("expiration_date", {}).get("value", "N/A") if ent_b.get("expiration_date") else "N/A"
+        if exp_a != exp_b:
+            entity_diffs.append({
+                "field": "Expiration / Term",
+                "contract_a": exp_a,
+                "contract_b": exp_b,
+                "impact": "Contract duration or expiration date altered."
             })
 
         # Clause-by-clause similarity alignment

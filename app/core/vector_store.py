@@ -131,6 +131,34 @@ class ContractVectorStore:
             if not found:
                 answer = "No explicit non-compete restriction was identified in the contract."
 
+        elif "indemnif" in q_lower or "hold harmless" in q_lower or "indemnity" in q_lower:
+            for r in search_results:
+                if "indemnif" in r["text"].lower() or "hold harmless" in r["text"].lower():
+                    relevant_clause = r
+                    answer = f"Indemnification provision ({r['heading']}): \"{r['text'][:300]}...\""
+                    break
+
+        elif "intellectual property" in q_lower or " ip " in f" {q_lower} " or "ownership" in q_lower or "patent" in q_lower or "copyright" in q_lower or "work made for hire" in q_lower:
+            for r in search_results:
+                if any(k in r["text"].lower() for k in ["intellectual property", "ownership", "title", "license", "proprietary", "patent"]):
+                    relevant_clause = r
+                    answer = f"Intellectual Property & Ownership provision ({r['heading']}): \"{r['text'][:300]}...\""
+                    break
+
+        elif "confidential" in q_lower or "trade secret" in q_lower or "nda" in q_lower or "non-disclosure" in q_lower:
+            for r in search_results:
+                if "confidential" in r["text"].lower() or "disclosure" in r["text"].lower():
+                    relevant_clause = r
+                    answer = f"Confidentiality & Non-Disclosure clause ({r['heading']}): \"{r['text'][:300]}...\""
+                    break
+
+        elif "audit" in q_lower or "inspect" in q_lower or "books and records" in q_lower:
+            for r in search_results:
+                if "audit" in r["text"].lower() or "inspect" in r["text"].lower() or "records" in r["text"].lower():
+                    relevant_clause = r
+                    answer = f"Audit & Inspection Rights ({r['heading']}): \"{r['text'][:300]}...\""
+                    break
+
         elif "notice" in q_lower or "renewal" in q_lower or "terminate" in q_lower:
             if search_results:
                 relevant_clause = search_results[0]

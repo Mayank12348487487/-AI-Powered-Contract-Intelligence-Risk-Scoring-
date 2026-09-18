@@ -14,10 +14,9 @@ logger = logging.getLogger(__name__)
 HEADER_PATTERNS = [
     re.compile(r'^(ARTICLE\s+[IVXLCDM0-9]+[\.\:\-]?\s*.*)$', re.IGNORECASE),
     re.compile(r'^(SECTION\s+[0-9]+(\.[0-9]+)*[\.\:\-]?\s*.*)$', re.IGNORECASE),
-    re.compile(r'^([0-9]+\.[0-9]*\s+[A-Z0-9\s\,\-\&\/\(\)]+)$'),
-    re.compile(r'^([0-9]+\.\s+[A-Z0-9\s\,\-\&\/\(\)]+)$'),
+    re.compile(r'^([0-9]+(?:\.[0-9]+)*[\.\:\-\)]\s*.*)$', re.IGNORECASE),
     re.compile(r'^(RECITALS|WHEREAS|OPERATIVE PROVISIONS|SCHEDULE\s+[A-Z0-9]|EXHIBIT\s+[A-Z0-9]|ANNEX\s+[A-Z0-9])$', re.IGNORECASE),
-    re.compile(r'^([A-Z\s]{4,40}\s*\:)$')
+    re.compile(r'^([A-Za-z\s]{4,40}\s*\:)$')
 ]
 
 class DocumentSegment:
@@ -169,6 +168,25 @@ class DocumentParser:
             return []
 
         raw_blocks = re.split(r'\n{2,}', full_text)
+
+        # If text is single-newline formatted but contains numbered sections/headers, split along headers
+        if len(raw_blocks) <= 1 and '\n' in full_text:
+            lines = full_text.split('\n')
+            assembled_blocks = []
+            current_block = []
+            for line in lines:
+                sline = line.strip()
+                is_hdr = any(p.match(sline) for p in HEADER_PATTERNS)
+                if is_hdr and current_block:
+                    assembled_blocks.append('\n'.join(current_block))
+                    current_block = [line]
+                else:
+                    current_block.append(line)
+            if current_block:
+                assembled_blocks.append('\n'.join(current_block))
+            if len(assembled_blocks) > 1:
+                raw_blocks = assembled_blocks
+
         segments: List[DocumentSegment] = []
         current_offset = 0
         seg_id = 1

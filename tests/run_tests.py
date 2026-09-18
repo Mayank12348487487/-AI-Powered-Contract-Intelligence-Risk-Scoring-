@@ -23,8 +23,9 @@ def run_all():
 
     # 2. NER
     print("[2/5] Testing Legal NER Engine...", end=" ", flush=True)
-    from tests.test_ner import test_ner_party_and_date_extraction
+    from tests.test_ner import test_ner_party_and_date_extraction, test_ner_international_entities
     test_ner_party_and_date_extraction()
+    test_ner_international_entities()
     print("PASSED", flush=True)
 
     # 3. Clause Classification
@@ -58,15 +59,29 @@ def run_all():
         test_cuad_categories_endpoint,
         test_samples_endpoint,
         test_load_sample_analysis,
+        test_load_sample_not_found,
         test_contract_chat_endpoint,
-        test_contract_compare_endpoint
+        test_contract_search_endpoint,
+        test_contract_entities_and_risk_endpoints,
+        test_contract_compare_endpoint,
+        test_contract_compare_not_found,
+        test_contract_export_endpoints,
+        test_contract_upload_raw_text,
+        test_contract_upload_empty_fails
     )
     test_health_check()
     test_cuad_categories_endpoint()
     test_samples_endpoint()
     test_load_sample_analysis()
+    test_load_sample_not_found()
     test_contract_chat_endpoint()
+    test_contract_search_endpoint()
+    test_contract_entities_and_risk_endpoints()
     test_contract_compare_endpoint()
+    test_contract_compare_not_found()
+    test_contract_export_endpoints()
+    test_contract_upload_raw_text()
+    test_contract_upload_empty_fails()
     print("PASSED", flush=True)
 
     elapsed = round(time.time() - t0, 2)

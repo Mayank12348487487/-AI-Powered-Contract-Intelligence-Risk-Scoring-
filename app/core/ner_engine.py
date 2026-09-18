@@ -10,7 +10,9 @@ JURISDICTIONS = [
     "Washington", "Florida", "Ohio", "Pennsylvania", "New Jersey", "Georgia",
     "North Carolina", "Virginia", "Colorado", "Nevada", "England and Wales",
     "United Kingdom", "Switzerland", "Canton of Zurich", "Germany", "Singapore",
-    "France", "Canada", "Ontario", "British Columbia", "Ireland"
+    "Hong Kong", "Japan", "India", "Australia", "New South Wales", "Victoria",
+    "France", "Canada", "Ontario", "British Columbia", "Ireland", "Scotland",
+    "Luxembourg", "Netherlands", "Sweden"
 ]
 
 PARTY_ROLES = [
@@ -32,7 +34,7 @@ class LegalNER:
         
         # Monetary Values: $120,000 USD | $1,500,000 | 500,000 USD | 2,500,000 EUR
         self.money_regex = re.compile(
-            r'(?:\$|USD|EUR|GBP|€|£)\s*[\d,]+(?:\.\d{2})?(?:\s*(?:USD|EUR|GBP|million|billion|thousand))?|[\d,]+(?:\.\d{2})?\s*(?:USD|dollars|EUR|GBP)',
+            r'(?:\$|USD|EUR|GBP|€|£|AUD|CAD|INR|SGD)\s*[\d,]+(?:\.\d{2})?(?:\s*(?:USD|EUR|GBP|AUD|CAD|INR|SGD|million|billion|thousand))?|[\d,]+(?:\.\d{2})?\s*(?:USD|dollars|EUR|GBP|AUD|CAD|INR|SGD)',
             re.IGNORECASE
         )
         
@@ -50,7 +52,7 @@ class LegalNER:
 
         # Party definitions: [Company Name, Inc.], a [Delaware corporation] ("Provider")
         self.party_bracket_regex = re.compile(
-            r'([A-Z][A-Za-z0-9\s\,\.\&\-]+?(?:Inc\.|LLC|Corp\.|Corporation|Ltd\.|Limited|AG|GmbH|Co\.))(?:\s*,\s*a\s+[A-Za-z\s]+(?:corporation|company|entity))?\s*(?:\([\"“\']([A-Za-z\s]+)[\"”\']\))?',
+            r'([A-Z][A-Za-z0-9\s\,\.\&\-]+?(?:Inc\.|LLC|Corp\.|Corporation|Ltd\.|Limited|Pty\s+Ltd|PLC|LLP|AG|GmbH|Co\.|S\.A\.|B\.V\.|Pte\.\s*Ltd\.))(?:\s*,\s*a\s+[A-Za-z\s]+(?:corporation|company|entity|partnership))?\s*(?:\([\"“\']([A-Za-z\s]+)[\"”\']\))?',
             re.IGNORECASE
         )
 
@@ -165,21 +167,30 @@ class LegalNER:
 
     def extract_governing_law(self, text: str) -> Optional[Dict[str, Any]]:
         """Extract governing jurisdiction and applicable law."""
-        # Find governing law paragraph
-        law_match = re.search(r'(?:governed\s+by|laws\s+of\s+the\s+state\s+of|jurisdiction\s+of)\s+([A-Za-z\s\,]+)', text, re.IGNORECASE)
+        # Find governing law paragraph or sentence
+        law_match = re.search(r'(?:governed\s+by(?:\s+the\s+laws\s+of)?|laws\s+of\s+(?:the\s+state\s+of|the\s+country\s+of)?|jurisdiction\s+of|exclusive\s+jurisdiction\s+of)\s+([A-Za-z\s\,\.]+)', text, re.IGNORECASE)
         found_jurisdiction = None
         
-        for state in JURISDICTIONS:
-            if re.search(rf'\b{re.escape(state)}\b', text, re.IGNORECASE):
-                # prioritize if in governing law clause
-                found_jurisdiction = state
-                break
+        # 1. Search inside explicit governing law clause context first
+        if law_match:
+            clause_context = law_match.group(0)
+            for state in JURISDICTIONS:
+                if re.search(rf'\b{re.escape(state)}\b', clause_context, re.IGNORECASE):
+                    found_jurisdiction = state
+                    break
+
+        # 2. Fallback to searching across text
+        if not found_jurisdiction:
+            for state in JURISDICTIONS:
+                if re.search(rf'\b{re.escape(state)}\b', text, re.IGNORECASE):
+                    found_jurisdiction = state
+                    break
 
         if found_jurisdiction:
             return {
                 "jurisdiction": found_jurisdiction,
                 "confidence": 0.95,
-                "clause_snippet": law_match.group(0) if law_match else f"Laws of {found_jurisdiction}"
+                "clause_snippet": law_match.group(0).strip() if law_match else f"Laws of {found_jurisdiction}"
             }
         return None
 

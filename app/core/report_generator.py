@@ -1,5 +1,6 @@
 import io
 import json
+import html
 import logging
 from typing import Dict, Any
 from pathlib import Path
@@ -27,27 +28,38 @@ class ReportGenerator:
         risk = analysis_data.get("risk_analysis", {})
         entities = analysis_data.get("entities", {})
         score = risk.get("composite_score", 0)
-        tier = risk.get("risk_tier", "LOW")
-        color = risk.get("risk_color", "#10B981")
-        doc_name = analysis_data.get("filename", "Contract Document")
+        tier = html.escape(str(risk.get("risk_tier", "LOW")))
+        color = html.escape(str(risk.get("risk_color", "#10B981")))
+        doc_name = html.escape(str(analysis_data.get("filename", "Contract Document")))
 
         parties = entities.get("parties", [])
-        parties_html = "".join([f"<li><strong>{p['name']}</strong> ({p.get('role', 'Party')})</li>" for p in parties]) if parties else "<li>Not detected</li>"
+        parties_html = "".join([
+            f"<li><strong>{html.escape(p['name'])}</strong> ({html.escape(p.get('role', 'Party'))})</li>"
+            for p in parties
+        ]) if parties else "<li>Not detected</li>"
 
         anomalies = risk.get("anomalies", [])
         anomalies_html = ""
         for a in anomalies:
+            cat = html.escape(str(a.get('category', 'Risk Flag')))
+            sev = html.escape(str(a.get('severity', 'HIGH')))
+            rat = html.escape(str(a.get('rationale', '')))
+            flag_txt = html.escape(str(a.get('flagged_text', ''))[:300])
+            redline = html.escape(str(a.get('recommended_redline', '')))
             anomalies_html += f"""
             <div style="border-left: 4px solid #EF4444; background: #FEF2F2; padding: 12px; margin-bottom: 12px; border-radius: 4px;">
-                <div style="font-weight: 700; color: #991B1B;">⚠️ {a.get('category')} ({a.get('severity')})</div>
-                <div style="margin: 6px 0; font-size: 13px; color: #374151;"><strong>Rationale:</strong> {a.get('rationale')}</div>
-                <div style="margin: 6px 0; font-size: 13px; color: #1F2937; background: #FFFFFF; padding: 8px; border: 1px dashed #FCA5A5; border-radius: 4px;"><strong>Flagged Language:</strong> "{a.get('flagged_text', '')[:300]}..."</div>
-                <div style="font-size: 13px; color: #065F46; background: #ECFDF5; padding: 6px; border-radius: 4px;"><strong>Recommended Standard Redline:</strong> {a.get('recommended_redline')}</div>
+                <div style="font-weight: 700; color: #991B1B;">⚠️ {cat} ({sev})</div>
+                <div style="margin: 6px 0; font-size: 13px; color: #374151;"><strong>Rationale:</strong> {rat}</div>
+                <div style="margin: 6px 0; font-size: 13px; color: #1F2937; background: #FFFFFF; padding: 8px; border: 1px dashed #FCA5A5; border-radius: 4px;"><strong>Flagged Language:</strong> "{flag_txt}..."</div>
+                <div style="font-size: 13px; color: #065F46; background: #ECFDF5; padding: 6px; border-radius: 4px;"><strong>Recommended Standard Redline:</strong> {redline}</div>
             </div>
             """
 
         recs = risk.get("actionable_recommendations", [])
-        recs_html = "".join([f"<li><strong>[{r.get('priority')} Priority] {r.get('action')}:</strong> {r.get('guidance')}</li>" for r in recs])
+        recs_html = "".join([
+            f"<li><strong>[{html.escape(str(r.get('priority', 'Medium')))} Priority] {html.escape(str(r.get('action', '')))}:</strong> {html.escape(str(r.get('guidance', '')))}</li>"
+            for r in recs
+        ])
 
         html_content = f"""<!DOCTYPE html>
 <html lang="en">

@@ -32,3 +32,16 @@ Either party may terminate upon sixty (60) days prior written notice.
     # Check Notice Periods
     notices = [n["duration"] for n in entities["notice_periods"]]
     assert any("60" in n or "sixty" in n.lower() for n in notices)
+
+def test_ner_international_entities():
+    intl_text = """This Consulting Agreement is entered into by and between Nova Dynamics Pty Ltd ("Consultant") and Horizon Ventures PLC ("Client").
+Governing Law: This agreement shall be governed by the laws of England and Wales.
+Consultant fee is £85,000 GBP payable within 45 days of receipt (Net 45).
+"""
+    entities = ner_engine.extract_entities(intl_text)
+    party_names = [p["name"] for p in entities["parties"]]
+    assert any("Nova Dynamics" in name for name in party_names)
+    assert any("Horizon Ventures" in name for name in party_names)
+    assert entities["governing_law"] is not None
+    assert entities["governing_law"]["jurisdiction"] == "England and Wales"
+    assert any("85,000" in m["amount"] for m in entities["monetary_values"])
