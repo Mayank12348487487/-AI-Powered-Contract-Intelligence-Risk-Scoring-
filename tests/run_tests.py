@@ -34,12 +34,16 @@ def run_all():
         test_cuad_categories_loaded,
         test_classify_liability_clause,
         test_classify_non_compete,
-        test_classify_indemnity
+        test_classify_indemnity,
+        test_classify_unlimited_liability,
+        test_classify_force_majeure
     )
     test_cuad_categories_loaded()
     test_classify_liability_clause()
     test_classify_non_compete()
     test_classify_indemnity()
+    test_classify_unlimited_liability()
+    test_classify_force_majeure()
     print("PASSED", flush=True)
 
     # 4. Risk Scorer
