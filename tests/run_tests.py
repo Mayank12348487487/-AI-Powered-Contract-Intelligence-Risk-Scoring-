@@ -23,9 +23,14 @@ def run_all():
 
     # 2. NER
     print("[2/5] Testing Legal NER Engine...", end=" ", flush=True)
-    from tests.test_ner import test_ner_party_and_date_extraction, test_ner_international_entities
+    from tests.test_ner import (
+        test_ner_party_and_date_extraction,
+        test_ner_international_entities,
+        test_ner_global_currencies_and_jurisdictions
+    )
     test_ner_party_and_date_extraction()
     test_ner_international_entities()
+    test_ner_global_currencies_and_jurisdictions()
     print("PASSED", flush=True)
 
     # 3. Clause Classification
@@ -50,10 +55,12 @@ def run_all():
     print("[4/5] Testing Multi-Dimensional Risk Scorer...", end=" ", flush=True)
     from tests.test_risk_scorer import (
         test_safe_mutual_nda_risk,
-        test_critical_unfavorable_licensing_risk
+        test_critical_unfavorable_licensing_risk,
+        test_expanded_anomaly_patterns
     )
     test_safe_mutual_nda_risk()
     test_critical_unfavorable_licensing_risk()
+    test_expanded_anomaly_patterns()
     print("PASSED", flush=True)
 
     # 5. API Endpoints
@@ -71,7 +78,10 @@ def run_all():
         test_contract_compare_not_found,
         test_contract_export_endpoints,
         test_contract_upload_raw_text,
-        test_contract_upload_empty_fails
+        test_contract_upload_empty_fails,
+        test_search_and_chat_empty_validation,
+        test_export_not_found,
+        test_document_registry_eviction
     )
     test_health_check()
     test_cuad_categories_endpoint()
@@ -86,6 +96,9 @@ def run_all():
     test_contract_export_endpoints()
     test_contract_upload_raw_text()
     test_contract_upload_empty_fails()
+    test_search_and_chat_empty_validation()
+    test_export_not_found()
+    test_document_registry_eviction()
     print("PASSED", flush=True)
 
     elapsed = round(time.time() - t0, 2)
@@ -95,3 +108,4 @@ def run_all():
 
 if __name__ == "__main__":
     run_all()
+

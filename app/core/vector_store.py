@@ -159,10 +159,40 @@ class ContractVectorStore:
                     answer = f"Audit & Inspection Rights ({r['heading']}): \"{r['text'][:300]}...\""
                     break
 
-        elif "notice" in q_lower or "renewal" in q_lower or "terminate" in q_lower:
-            if search_results:
-                relevant_clause = search_results[0]
-                answer = f"Regarding termination and notice terms ({search_results[0]['heading']}): \"{search_results[0]['text'][:300]}...\""
+        elif "warranty" in q_lower or "guarantee" in q_lower or "as is" in q_lower or "disclaimer" in q_lower:
+            for r in search_results:
+                if any(k in r["text"].lower() for k in ["warrant", "as-is", "disclaimer", "merchantability", "fitness"]):
+                    relevant_clause = r
+                    answer = f"Warranty & Disclaimer provision ({r['heading']}): \"{r['text'][:300]}...\""
+                    break
+
+        elif "force majeure" in q_lower or "act of god" in q_lower or "disaster" in q_lower or "pandemic" in q_lower:
+            for r in search_results:
+                if any(k in r["text"].lower() for k in ["force majeure", "acts of god", "war", "disaster", "beyond reasonable control"]):
+                    relevant_clause = r
+                    answer = f"Force Majeure provision ({r['heading']}): \"{r['text'][:300]}...\""
+                    break
+
+        elif "assign" in q_lower or "assignment" in q_lower or "transfer" in q_lower or "merger" in q_lower:
+            for r in search_results:
+                if any(k in r["text"].lower() for k in ["assign", "transfer", "merger", "successor", "consent"]):
+                    relevant_clause = r
+                    answer = f"Assignment & Transfer provision ({r['heading']}): \"{r['text'][:300]}...\""
+                    break
+
+        elif "insurance" in q_lower or "coverage" in q_lower or "policy" in q_lower:
+            for r in search_results:
+                if any(k in r["text"].lower() for k in ["insurance", "policy", "coverage", "liability insurance"]):
+                    relevant_clause = r
+                    answer = f"Insurance Requirements ({r['heading']}): \"{r['text'][:300]}...\""
+                    break
+
+        elif "payment" in q_lower or "fee" in q_lower or "invoice" in q_lower or "pricing" in q_lower:
+            for r in search_results:
+                if any(k in r["text"].lower() for k in ["pay", "fee", "invoice", "net 30", "due date", "price"]):
+                    relevant_clause = r
+                    answer = f"Payment & Pricing Terms ({r['heading']}): \"{r['text'][:300]}...\""
+                    break
 
         # Fallback to top semantic vector search result
         if not answer:

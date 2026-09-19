@@ -36,3 +36,20 @@ def test_critical_unfavorable_licensing_risk():
     assert risk["composite_score"] >= 70
     assert risk["risk_tier"] in ["HIGH", "CRITICAL"]
     assert len(risk["anomalies"]) >= 3
+
+def test_expanded_anomaly_patterns():
+    risky_clauses = """TERMS OF SERVICE
+1. Provider may modify these terms at any time by posting updates without prior written notice.
+2. Customer waives all right to a jury trial and class action.
+3. All confidentiality covenants and restrictions shall survive in perpetuity.
+"""
+    parsed = DocumentParser.parse_file("tos.txt", risky_clauses.encode('utf-8'))
+    entities = ner_engine.extract_entities(risky_clauses)
+    enriched = clause_classifier.classify_document_segments(parsed["segments"])
+    risk = risk_engine.evaluate_contract_risk(risky_clauses, enriched, entities)
+    
+    categories_flagged = [a["category"] for a in risk["anomalies"]]
+    assert "Unilateral Terms Modification" in categories_flagged
+    assert "Waiver of Jury Trial & Class Action" in categories_flagged
+    assert "Perpetual Restrictive Obligations" in categories_flagged
+

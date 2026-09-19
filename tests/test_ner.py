@@ -45,3 +45,18 @@ Consultant fee is £85,000 GBP payable within 45 days of receipt (Net 45).
     assert entities["governing_law"] is not None
     assert entities["governing_law"]["jurisdiction"] == "England and Wales"
     assert any("85,000" in m["amount"] for m in entities["monetary_values"])
+
+def test_ner_global_currencies_and_jurisdictions():
+    global_text = """MASTER LICENSING AGREEMENT
+This Agreement is entered into by Zenith Global GmbH ("Licensor") and Apex Innovations Pte Ltd ("Licensee").
+Governing Law: This agreement shall be governed by the laws of Singapore.
+Fees: Licensee shall pay €500,000 EUR on the Effective Date, ¥10,000,000 JPY in annual maintenance, and CHF 250,000 for integration services.
+"""
+    entities = ner_engine.extract_entities(global_text)
+    assert entities["governing_law"]["jurisdiction"] == "Singapore"
+    
+    amounts = [m["amount"] for m in entities["monetary_values"]]
+    assert any("500,000" in amt for amt in amounts)
+    assert any("10,000,000" in amt for amt in amounts)
+    assert any("250,000" in amt for amt in amounts)
+

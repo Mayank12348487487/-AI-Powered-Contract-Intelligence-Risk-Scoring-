@@ -88,6 +88,30 @@ ANOMALY_PATTERNS = [
         "points": 12,
         "rationale": "Permits counterparty to alter agreed pricing or rate cards arbitrarily without advance notice or exit rights.",
         "recommended_redline": "Any fee adjustments shall occur not more than once per renewal term and require at least sixty (60) days prior written notice with right of termination."
+    },
+    {
+        "pattern": re.compile(r'(?:waives?\s+(?:all\s+)?right\s+to\s+(?:a\s+)?jury\s+trial|waiver\s+of\s+jury\s+trial|class\s+action\s+waiver|waives?\s+class\s+action)', re.IGNORECASE),
+        "category": "Waiver of Jury Trial & Class Action",
+        "severity": "MEDIUM",
+        "points": 8,
+        "rationale": "Eliminates standard constitutional and procedural legal dispute rights, forcing dispute into binding summary proceedings.",
+        "recommended_redline": "Disputes shall be resolved in courts of competent jurisdiction without mandatory waiver of statutory procedural rights."
+    },
+    {
+        "pattern": re.compile(r'(?:modify|update|amend)\s+(?:this\s+agreement|these\s+terms)\s+at\s+any\s+time\s+(?:by\s+posting|without\s+(?:prior\s+)?written\s+notice)', re.IGNORECASE),
+        "category": "Unilateral Terms Modification",
+        "severity": "HIGH",
+        "points": 14,
+        "rationale": "Allows one party to change contractual obligations dynamically by website posting without counterparty written consent.",
+        "recommended_redline": "No amendment or modification of this Agreement shall be valid unless in writing and signed by authorized representatives of both Parties."
+    },
+    {
+        "pattern": re.compile(r'(?:covenants?|restrictions?|obligations?)\s+shall\s+survive\s+(?:in\s+perpetuity|indefinitely|forever)', re.IGNORECASE),
+        "category": "Perpetual Restrictive Obligations",
+        "severity": "HIGH",
+        "points": 12,
+        "rationale": "Imposes open-ended restrictive covenants surviving contract termination indefinitely without temporal bounds.",
+        "recommended_redline": "Post-termination survival obligations shall be strictly limited to a defined duration of two (2) to three (3) years."
     }
 ]
 

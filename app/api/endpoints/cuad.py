@@ -12,8 +12,10 @@ from app.core.vector_store import vector_store
 
 router = APIRouter()
 
-# In-memory document storage for the session
-DOCUMENT_REGISTRY: Dict[str, Dict[str, Any]] = {}
+from app.core.registry import document_registry
+
+# Alias for backward compatibility
+DOCUMENT_REGISTRY = document_registry
 
 SAMPLE_METADATA = [
     {

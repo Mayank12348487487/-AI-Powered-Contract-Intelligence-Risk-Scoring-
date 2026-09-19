@@ -147,3 +147,37 @@ Between Alpha Solutions Corp ("Provider") and Beta Retail LLC ("Customer").
 def test_contract_upload_empty_fails():
     response = client.post("/api/contracts/upload", data={})
     assert response.status_code == 400
+
+def test_search_and_chat_empty_validation():
+    client.get("/api/contracts/samples/saas_master_agreement")
+    
+    # Empty query search
+    res_s = client.post("/api/contracts/sample_saas_master_agreement/search", json={"query": "   ", "top_k": 3})
+    assert res_s.status_code == 400
+
+    # Empty query chat
+    res_c = client.post("/api/contracts/sample_saas_master_agreement/chat", json={"query": "   "})
+    assert res_c.status_code == 400
+
+def test_export_not_found():
+    res_json = client.get("/api/contracts/non_existent_doc_id/export/json")
+    assert res_json.status_code == 404
+
+    res_pdf = client.get("/api/contracts/non_existent_doc_id/export/pdf")
+    assert res_pdf.status_code == 404
+
+def test_document_registry_eviction():
+    from app.core.registry import DocumentRegistry
+    reg = DocumentRegistry(max_documents=3)
+    reg.set("doc1", {"filename": "Doc 1"})
+    reg.set("doc2", {"filename": "Doc 2"})
+    reg.set("doc3", {"filename": "Doc 3"})
+    assert len(reg) == 3
+    
+    # Adding a 4th document should evict doc1 (LRU)
+    reg.set("doc4", {"filename": "Doc 4"})
+    assert len(reg) == 3
+    assert not reg.has("doc1")
+    assert reg.has("doc2")
+    assert reg.has("doc4")
+

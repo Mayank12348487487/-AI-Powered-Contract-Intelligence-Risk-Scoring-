@@ -12,13 +12,15 @@ JURISDICTIONS = [
     "United Kingdom", "Switzerland", "Canton of Zurich", "Germany", "Singapore",
     "Hong Kong", "Japan", "India", "Australia", "New South Wales", "Victoria",
     "France", "Canada", "Ontario", "British Columbia", "Ireland", "Scotland",
-    "Luxembourg", "Netherlands", "Sweden"
+    "Luxembourg", "Netherlands", "Sweden", "Cayman Islands", "Bermuda", "Dubai",
+    "United Arab Emirates", "New Zealand", "Norway", "Denmark", "Finland"
 ]
 
 PARTY_ROLES = [
-    "Provider", "Customer", "Client", "Vendor", "Supplier", "Buyer",
-    "Licensor", "Licensee", "Disclosing Party", "Receiving Party",
-    "Company", "Contractor", "Consultant", "Partner", "Borrower", "Lender"
+    "Provider", "Customer", "Client", "Vendor", "Supplier", "Buyer", "Seller",
+    "Licensor", "Licensee", "Disclosing Party", "Receiving Party", "Subscriber",
+    "Company", "Contractor", "Consultant", "Partner", "Borrower", "Lender",
+    "Distributor", "Reseller", "Author", "Publisher"
 ]
 
 class LegalNER:
@@ -26,33 +28,33 @@ class LegalNER:
         self._compile_regexes()
 
     def _compile_regexes(self):
-        # Dates: October 15, 2025 | 15th day of October, 2025 | 2025-10-15 | 10/15/2025
+        # Dates: October 15, 2025 | 15th day of October, 2025 | 15 October 2025 | 2025-10-15 | 10/15/2025 | 15/10/2025
         self.date_regex = re.compile(
-            r'\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:st|nd|rd|th)?,\s+\d{4}\b|\b\d{1,2}(?:st|nd|rd|th)?\s+day\s+of\s+(?:January|February|March|April|May|June|July|August|September|October|November|December),?\s+\d{4}\b|\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}/\d{1,2}/\d{4}\b',
+            r'\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:st|nd|rd|th)?,\s+\d{4}\b|\b\d{1,2}(?:st|nd|rd|th)?\s+(?:day\s+of\s+)?(?:January|February|March|April|May|June|July|August|September|October|November|December),?\s+\d{4}\b|\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}/\d{1,2}/\d{4}\b',
             re.IGNORECASE
         )
         
-        # Monetary Values: $120,000 USD | $1,500,000 | 500,000 USD | 2,500,000 EUR
+        # Monetary Values: $120,000 USD | $1,500,000 | 500,000 USD | 2,500,000 EUR | €500,000 | £85,000 | ¥10,000,000 | ₹5,00,000 | CHF 250,000
         self.money_regex = re.compile(
-            r'(?:\$|USD|EUR|GBP|€|£|AUD|CAD|INR|SGD)\s*[\d,]+(?:\.\d{2})?(?:\s*(?:USD|EUR|GBP|AUD|CAD|INR|SGD|million|billion|thousand))?|[\d,]+(?:\.\d{2})?\s*(?:USD|dollars|EUR|GBP|AUD|CAD|INR|SGD)',
+            r'(?:\$|USD|EUR|GBP|€|£|AUD|CAD|INR|SGD|CHF|JPY|¥|₹|AED|NZD|SEK)\s*[\d,]+(?:\.\d{2})?(?:\s*(?:USD|EUR|GBP|AUD|CAD|INR|SGD|CHF|JPY|dollars|euros|pounds|million|billion|thousand|k))?|[\d,]+(?:\.\d{2})?\s*(?:USD|dollars|EUR|euros|GBP|pounds|AUD|CAD|INR|rupees|SGD|CHF|JPY|yen)',
             re.IGNORECASE
         )
         
-        # Termination / Notice Periods: 30 days | sixty (60) days | 24 hours | 12 months
+        # Termination / Notice Periods: 30 days | sixty (60) days | 24 hours | 12 months | 5 business days
         self.notice_period_regex = re.compile(
-            r'\b(?:one|two|three|five|seven|ten|fifteen|twenty|thirty|forty-five|sixty|ninety|one hundred|three hundred and sixty-five|\d+)\s*(?:\(\d+\))?\s*(?:business\s+days|calendar\s+days|days|hours|weeks|months|years)\b',
+            r'\b(?:one|two|three|five|seven|ten|fourteen|fifteen|twenty|thirty|forty-five|sixty|ninety|one hundred|one hundred and twenty|one hundred and eighty|three hundred and sixty-five|\d+)\s*(?:\(\d+\))?\s*(?:business\s+days|calendar\s+days|days|hours|weeks|months|years)\b',
             re.IGNORECASE
         )
         
-        # Payment terms: Net 30, Net 45, Net 60, Net 90
+        # Payment terms: Net 15, Net 30, Net 45, Net 60, Net 90
         self.payment_terms_regex = re.compile(
-            r'\b(?:Net\s*(?:15|30|45|60|90)|within\s+\d+\s+days\s+of\s+(?:invoice|receipt)|upon\s+receipt|quarterly|monthly|annually)\b',
+            r'\b(?:Net\s*(?:15|30|45|60|90|120)|within\s+\d+\s+(?:business\s+)?days\s+of\s+(?:invoice|receipt)|upon\s+receipt|quarterly|monthly|annually|in\s+advance)\b',
             re.IGNORECASE
         )
 
         # Party definitions: [Company Name, Inc.], a [Delaware corporation] ("Provider")
         self.party_bracket_regex = re.compile(
-            r'([A-Z][A-Za-z0-9\s\,\.\&\-]+?(?:Inc\.|LLC|Corp\.|Corporation|Ltd\.|Limited|Pty\s+Ltd|PLC|LLP|AG|GmbH|Co\.|S\.A\.|B\.V\.|Pte\.\s*Ltd\.))(?:\s*,\s*a\s+[A-Za-z\s]+(?:corporation|company|entity|partnership))?\s*(?:\([\"“\']([A-Za-z\s]+)[\"”\']\))?',
+            r'([A-Z][A-Za-z0-9\s\,\.\&\-]+?(?:Inc\.|LLC|Corp\.|Corporation|Ltd\.|Limited|Pty\s+Ltd|PLC|LLP|AG|GmbH|Co\.|S\.A\.|B\.V\.|Pte\.\s*Ltd\.|S\.r\.l\.|K\.K\.))(?:\s*,\s*a\s+[A-Za-z\s]+(?:corporation|company|entity|partnership))?\s*(?:\([\"“\']([A-Za-z\s]+)[\"”\']\))?',
             re.IGNORECASE
         )
 
