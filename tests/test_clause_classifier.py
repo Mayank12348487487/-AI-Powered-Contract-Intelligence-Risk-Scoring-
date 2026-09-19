@@ -42,3 +42,10 @@ def test_classify_force_majeure():
     assert len(matches) > 0
     cat_ids = [m["category_id"] for m in matches]
     assert "force_majeure" in cat_ids
+
+def test_classify_termination_for_convenience():
+    text = "Either Party may terminate this Agreement for convenience without cause by providing thirty (30) days written notice."
+    matches = clause_classifier.classify_clause(text)
+    assert len(matches) > 0
+    cat_ids = [m["category_id"] for m in matches]
+    assert "termination_for_convenience" in cat_ids
