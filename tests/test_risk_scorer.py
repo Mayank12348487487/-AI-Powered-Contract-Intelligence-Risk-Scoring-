@@ -53,3 +53,24 @@ def test_expanded_anomaly_patterns():
     assert "Waiver of Jury Trial & Class Action" in categories_flagged
     assert "Perpetual Restrictive Obligations" in categories_flagged
 
+def test_termination_for_convenience_risk():
+    contract_text = """SERVICE AGREEMENT
+Effective as of January 1, 2026, between Company A and Company B.
+1. Services shall be provided for an initial term of one year.
+2. Either party may terminate this Agreement for convenience without cause upon 30 days written notice.
+3. Confidential Information shall be protected for three years.
+4. Each party shall remain responsible for its own acts and omissions.
+"""
+    parsed = DocumentParser.parse_file(
+        "termination.txt", contract_text.encode("utf-8")
+    )
+    entities = ner_engine.extract_entities(contract_text)
+    enriched = clause_classifier.classify_document_segments(parsed["segments"])
+
+    risk = risk_engine.evaluate_contract_risk(
+        contract_text, enriched, entities
+    )
+
+    assert "risk_tier" in risk
+    assert "composite_score" in risk
+    assert 0 <= risk["composite_score"] <= 100
