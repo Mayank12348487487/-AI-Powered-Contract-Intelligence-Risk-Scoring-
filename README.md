@@ -15,19 +15,20 @@ Designed for iterative enhancement, testing, and deployment through Docker.
 ## Table of Contents
 1. [Architecture & System Overview](#architecture--system-overview)
 2. [Key Capabilities & Features](#key-capabilities--features)
-3. [CUAD 41 Legal Categories Taxonomy](#cuad-41-legal-categories-taxonomy)
-4. [Multi-Dimensional Risk Scoring Engine](#multi-dimensional-risk-scoring-engine)
-5. [Legal Named Entity Recognition (NER)](#legal-named-entity-recognition-ner)
-6. [Semantic Vector Search & Legal Q&A Chatbot](#semantic-vector-search--legal-qa-chatbot)
-7. [Contract Redlining & Side-by-Side Comparison](#contract-redlining--side-by-side-comparison)
-8. [Project Structure](#project-structure)
-9. [Installation & Quickstart](#installation--quickstart)
-10. [Docker Deployment](#docker-deployment)
-11. [Automated Test Suite](#automated-test-suite)
-12. [API Reference & Endpoints](#api-reference--endpoints)
-13. [Sample Contracts Included](#sample-contracts-included)
-14. [4-Week Development Timeline](#4-week-development-timeline)
-15. [License](#license)
+3. [Typical Contract Analysis Workflow](#typical-contract-analysis-workflow)
+4. [CUAD 41 Legal Categories Taxonomy](#cuad-41-legal-categories-taxonomy)
+5. [Multi-Dimensional Risk Scoring Engine](#multi-dimensional-risk-scoring-engine)
+6. [Legal Named Entity Recognition (NER)](#legal-named-entity-recognition-ner)
+7. [Semantic Vector Search & Legal Q&A Chatbot](#semantic-vector-search--legal-qa-chatbot)
+8. [Contract Redlining & Side-by-Side Comparison](#contract-redlining--side-by-side-comparison)
+9. [Project Structure](#project-structure)
+10. [Installation & Quickstart](#installation--quickstart)
+11. [Docker Deployment](#docker-deployment)
+12. [Automated Test Suite](#automated-test-suite)
+13. [API Reference & Endpoints](#api-reference--endpoints)
+14. [Sample Contracts Included](#sample-contracts-included)
+15. [4-Week Development Timeline](#4-week-development-timeline)
+16. [License](#license)
 
 ---
 
@@ -84,6 +85,18 @@ flowchart TB
 - ⚖️ **Side-by-Side Contract Comparison & Diffing**: Compares two versions of a contract, highlighting risk score shift deltas, entity deviations, and altered clauses.
 - 📄 **1-Click Executive Report Export**: Instant downloadable executive audit reports in formatted PDF, printable HTML, and raw JSON payloads.
 - 🎨 **Modern Glassmorphic Web UI**: Dark/Light mode, animated SVG risk gauges, interactive clause highlight viewer with slide-over drawer inspector, entity matrix, and chatbot assistant.
+
+---
+
+## Typical Contract Analysis Workflow
+
+1. **Document Ingestion**: User uploads a PDF, DOCX, or TXT contract.
+2. **Text Extraction & Segmentation**: The ingestion pipeline extracts and segments the document into structured clauses.
+3. **Legal Entity Extraction (NER)**: Legal NER extracts important entities such as parties, dates, jurisdiction, liability caps, and notice periods.
+4. **Clause Classification**: The CUAD-based classifier identifies relevant contract clauses across the legal taxonomy.
+5. **Risk & Anomaly Scoring**: The risk engine calculates the multi-dimensional 0–100 risk score and identifies anomalies.
+6. **Semantic Search & Legal Q&A**: Semantic search and the Legal Q&A assistant allow users to query the analyzed contract.
+7. **Comparison & Audit Export**: Users can compare contracts and export PDF/JSON audit reports.
 
 ---
 
