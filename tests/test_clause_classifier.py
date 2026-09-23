@@ -49,3 +49,13 @@ def test_classify_termination_for_convenience():
     assert len(matches) > 0
     cat_ids = [m["category_id"] for m in matches]
     assert "termination_for_convenience" in cat_ids
+
+def test_classify_governing_law():
+    text = "This Agreement shall be governed by the laws of the State of California."
+    matches = clause_classifier.classify_clause(text)
+    assert len(matches) > 0
+    cat_ids = [m["category_id"] for m in matches]
+    assert "governing_law" in cat_ids
+
+
+
