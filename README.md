@@ -5,7 +5,7 @@
 [![CUAD Benchmark](https://img.shields.io/badge/Dataset-CUAD%2041%20Categories-orange.svg)](https://www.atticusprojectai.org/cuad)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/Tests-30%2F30%20Passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-32%2F32%20Passing-brightgreen.svg)]()
 
 A state-of-the-art NLP and Legal Intelligence platform designed for corporate counsel, procurement teams, and compliance officers. The platform automates contract review by ingesting multi-format legal documents (PDF, DOCX, TXT, OCR), extracting structured entities, classifying clauses across all **41 CUAD (Contract Understanding Atticus Dataset) categories**, computing a multi-dimensional **Risk Score (0–100)** with anomaly detection, and providing an interactive **Glassmorphic Web Studio** with semantic vector search, redline comparison, and downloadable audit reports.
 Built with a modular FastAPI backend and reusable NLP/risk-scoring components.

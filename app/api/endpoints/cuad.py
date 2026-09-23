@@ -1,18 +1,16 @@
-import json
 from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from typing import List, Dict, Any
 
-from app.config import DATA_DIR, SAMPLES_DIR
+from app.config import SAMPLES_DIR
 from app.core.clause_classifier import clause_classifier
 from app.core.ingestion import DocumentParser
 from app.core.ner_engine import ner_engine
 from app.core.risk_scorer import risk_engine
 from app.core.vector_store import vector_store
+from app.core.registry import document_registry
 
 router = APIRouter()
-
-from app.core.registry import document_registry
 
 # Alias for backward compatibility
 DOCUMENT_REGISTRY = document_registry
@@ -108,5 +106,5 @@ def load_and_analyze_sample(sample_id: str) -> Dict[str, Any]:
         "risk_analysis": risk_analysis
     }
 
-    DOCUMENT_REGISTRY[doc_id] = result
+    document_registry.set(doc_id, result)
     return result

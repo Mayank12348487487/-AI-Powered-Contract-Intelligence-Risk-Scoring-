@@ -2,9 +2,8 @@ import json
 import re
 import logging
 from typing import List, Dict, Any, Optional
-from pathlib import Path
 
-from app.config import DATA_DIR, settings
+from app.config import DATA_DIR
 from app.core.vector_math import FastTFIDFVectorizer, sparse_cosine_similarity
 
 logger = logging.getLogger(__name__)

@@ -1,6 +1,6 @@
 import math
 import re
-from typing import List, Dict, Tuple, Set, Optional
+from typing import List, Dict, Tuple, Set
 from collections import Counter
 
 # Standard English stopwords

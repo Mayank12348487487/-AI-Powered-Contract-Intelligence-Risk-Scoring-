@@ -1,6 +1,6 @@
 import re
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 
 from app.config import settings
 from app.core.clause_classifier import clause_classifier

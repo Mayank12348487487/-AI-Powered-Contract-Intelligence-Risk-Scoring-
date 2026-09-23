@@ -1,7 +1,6 @@
 from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
-from typing import Dict, Any
 
 from app.core.report_generator import report_generator
 from app.core.registry import document_registry

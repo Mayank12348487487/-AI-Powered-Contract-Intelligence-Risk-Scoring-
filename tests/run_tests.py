@@ -41,7 +41,8 @@ def run_all():
         test_classify_non_compete,
         test_classify_indemnity,
         test_classify_unlimited_liability,
-        test_classify_force_majeure
+        test_classify_force_majeure,
+        test_classify_termination_for_convenience
     )
     test_cuad_categories_loaded()
     test_classify_liability_clause()
@@ -49,6 +50,7 @@ def run_all():
     test_classify_indemnity()
     test_classify_unlimited_liability()
     test_classify_force_majeure()
+    test_classify_termination_for_convenience()
     print("PASSED", flush=True)
 
     # 4. Risk Scorer
@@ -56,11 +58,13 @@ def run_all():
     from tests.test_risk_scorer import (
         test_safe_mutual_nda_risk,
         test_critical_unfavorable_licensing_risk,
-        test_expanded_anomaly_patterns
+        test_expanded_anomaly_patterns,
+        test_termination_for_convenience_risk
     )
     test_safe_mutual_nda_risk()
     test_critical_unfavorable_licensing_risk()
     test_expanded_anomaly_patterns()
+    test_termination_for_convenience_risk()
     print("PASSED", flush=True)
 
     # 5. API Endpoints
