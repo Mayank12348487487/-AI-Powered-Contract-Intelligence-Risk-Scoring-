@@ -270,6 +270,8 @@ Contract_Intelligence/
 │   ├── test_ner.py                 # Legal NER extraction tests
 │   ├── test_clause_classifier.py   # CUAD 41 classification tests
 │   ├── test_risk_scorer.py         # Multi-factor risk calculation tests
+│   ├── test_vector_math.py         # TF-IDF vectorizer & sparse cosine similarity tests
+│   ├── test_compare.py             # Contract comparison & redline diff engine tests
 │   ├── test_api.py                 # REST API integration tests
 │   └── run_tests.py                # Standalone test runner
 ├── Dockerfile                      # Production-ready multi-stage Dockerfile
