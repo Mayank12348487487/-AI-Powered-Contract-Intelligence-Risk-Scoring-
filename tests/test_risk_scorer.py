@@ -74,3 +74,14 @@ Effective as of January 1, 2026, between Company A and Company B.
     assert "risk_tier" in risk
     assert "composite_score" in risk
     assert 0 <= risk["composite_score"] <= 100
+
+def test_ner_extracts_governing_law():
+    contract_text = """
+    SERVICE AGREEMENT
+    This Agreement is governed by the laws of the State of Massachusetts.
+    """
+
+    entities = ner_engine.extract_entities(contract_text)
+
+    assert entities["governing_law"] is not None
+    assert entities["governing_law"]["jurisdiction"] == "Massachusetts"
