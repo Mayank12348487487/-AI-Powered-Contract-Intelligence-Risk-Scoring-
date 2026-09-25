@@ -85,3 +85,15 @@ def test_ner_extracts_governing_law():
 
     assert entities["governing_law"] is not None
     assert entities["governing_law"]["jurisdiction"] == "Massachusetts"
+
+def test_ner_extracts_international_governing_law():
+    contract_text = """
+    SOFTWARE SERVICES AGREEMENT
+    This Agreement shall be governed by and construed in accordance
+    with the laws of India.
+    """
+
+    entities = ner_engine.extract_entities(contract_text)
+
+    assert entities["governing_law"] is not None
+    assert entities["governing_law"]["jurisdiction"] == "India"
