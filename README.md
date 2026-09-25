@@ -5,7 +5,7 @@
 [![CUAD Benchmark](https://img.shields.io/badge/Dataset-CUAD%2041%20Categories-orange.svg)](https://www.atticusprojectai.org/cuad)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/Tests-32%2F32%20Passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-40%2F40%20Passing%20(6%20Suites)-brightgreen.svg)]()
 
 A state-of-the-art NLP and Legal Intelligence platform designed for corporate counsel, procurement teams, and compliance officers. The platform automates contract review by ingesting multi-format legal documents (PDF, DOCX, TXT, OCR), extracting structured entities, classifying clauses across all **41 CUAD (Contract Understanding Atticus Dataset) categories**, computing a multi-dimensional **Risk Score (0–100)** with anomaly detection, and providing an interactive **Glassmorphic Web Studio** with semantic vector search, redline comparison, and downloadable audit reports.
 Built with a modular FastAPI backend and reusable NLP/risk-scoring components.
@@ -348,7 +348,14 @@ The container automatically includes health checks (`http://localhost:8000/healt
 
 ## Automated Test Suite
 
-The project includes an end-to-end automated test suite covering all modules:
+The project includes a comprehensive end-to-end test suite containing **40 unit and integration tests** organized across **6 test suites**:
+
+1. **Ingestion & Parsing (`test_ingestion.py`)**: Validates text normalization, line offset tracking, and clause segmentation across raw text, PDFs, and DOCX documents.
+2. **Legal NER Engine (`test_ner.py`)**: Tests party extraction, corporate entity forms, agreement dates, governing jurisdictions, and monetary liability caps.
+3. **CUAD 41 Clause Classifier (`test_clause_classifier.py`)**: Verifies pattern matching, confidence scoring, and classification against the Atticus 41-category legal taxonomy.
+4. **Multi-Dimensional Risk Scorer (`test_risk_scorer.py`)**: Validates 4-pillar risk calculations (Missing Protections, Unfavorable Anomalies, Operational Risks, and Ambiguity Penalties) and risk tier assignments.
+5. **Vector Math & Comparison Engines (`test_vector_math.py`, `test_compare.py`)**: Verifies pure-Python sparse TF-IDF vectorization, cosine similarity computation, and side-by-side contract redline diffing.
+6. **FastAPI Endpoints (`test_api.py`)**: Tests asynchronous REST API endpoints, document uploads, semantic search, conversational Q&A, and PDF/JSON export generation.
 
 ```bash
 python -u tests/run_tests.py
@@ -360,14 +367,15 @@ python -u tests/run_tests.py
 RUNNING CONTRACT INTELLIGENCE TEST SUITE
 ========================================
 
-[1/5] Testing Ingestion & Parsing... PASSED
-[2/5] Testing Legal NER Engine... PASSED
-[3/5] Testing CUAD 41 Clause Classifier... PASSED
-[4/5] Testing Multi-Dimensional Risk Scorer... PASSED
-[5/5] Testing FastAPI Endpoints... PASSED
+[1/6] Testing Ingestion & Parsing... PASSED
+[2/6] Testing Legal NER Engine... PASSED
+[3/6] Testing CUAD 41 Clause Classifier... PASSED
+[4/6] Testing Multi-Dimensional Risk Scorer... PASSED
+[5/6] Testing Vector Math & Comparison Engines... PASSED
+[6/6] Testing FastAPI Endpoints... PASSED
 
 ========================================
-ALL 5 TEST SUITES PASSED in 0.87s!
+ALL 6 TEST SUITES PASSED!
 ========================================
 ```
 
