@@ -97,3 +97,15 @@ def test_ner_extracts_international_governing_law():
 
     assert entities["governing_law"] is not None
     assert entities["governing_law"]["jurisdiction"] == "India"
+
+def test_ner_extracts_governing_law_with_confidence():
+    contract_text = """
+    MASTER SERVICE AGREEMENT
+    This Agreement is governed by the laws of the State of California.
+    """
+
+    entities = ner_engine.extract_entities(contract_text)
+
+    assert entities["governing_law"] is not None
+    assert entities["governing_law"]["jurisdiction"] == "California"
+    assert entities["governing_law"]["confidence"] >= 0.9
