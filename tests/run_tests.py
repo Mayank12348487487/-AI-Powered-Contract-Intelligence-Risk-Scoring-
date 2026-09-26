@@ -109,7 +109,8 @@ def run_all():
         test_contract_upload_empty_fails,
         test_search_and_chat_empty_validation,
         test_export_not_found,
-        test_document_registry_eviction
+        test_document_registry_eviction,
+        test_contract_export_with_special_characters
     )
     test_health_check()
     test_cuad_categories_endpoint()
@@ -127,6 +128,7 @@ def run_all():
     test_search_and_chat_empty_validation()
     test_export_not_found()
     test_document_registry_eviction()
+    test_contract_export_with_special_characters()
     print("PASSED", flush=True)
 
     elapsed = round(time.time() - t0, 2)

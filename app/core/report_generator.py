@@ -192,8 +192,9 @@ class ReportGenerator:
             story = []
             
             # Title
-            story.append(Paragraph("Contract Intelligence & Legal Risk Audit", title_style))
-            story.append(Paragraph(f"Document: <b>{analysis_data.get('filename', 'Contract')}</b>", body_style))
+            story.append(Paragraph("Contract Intelligence &amp; Legal Risk Audit", title_style))
+            doc_name = html.escape(str(analysis_data.get('filename', 'Contract')))
+            story.append(Paragraph(f"Document: <b>{doc_name}</b>", body_style))
             story.append(Spacer(1, 12))
 
             # Risk Summary Table
@@ -203,7 +204,7 @@ class ReportGenerator:
             
             summary_data = [
                 ["Risk Score", "Risk Tier", "Jurisdiction", "Anomalies"],
-                [f"{score}/100", tier, analysis_data.get("entities", {}).get("governing_law", {}).get("jurisdiction", "N/A"), str(len(risk.get("anomalies", [])))]
+                [f"{score}/100", tier, str(analysis_data.get("entities", {}).get("governing_law", {}).get("jurisdiction", "N/A")), str(len(risk.get("anomalies", [])))]
             ]
             t = Table(summary_data, colWidths=[120, 120, 150, 100])
             t.setStyle(TableStyle([
@@ -219,13 +220,17 @@ class ReportGenerator:
 
             # Executive Narrative
             story.append(Paragraph("Executive Summary", h2_style))
-            story.append(Paragraph(risk.get("executive_summary", "Analysis completed."), body_style))
+            exec_summary = html.escape(str(risk.get("executive_summary", "Analysis completed.")))
+            story.append(Paragraph(exec_summary, body_style))
             story.append(Spacer(1, 12))
 
             # Recommendations
             story.append(Paragraph("Actionable Recommendations", h2_style))
             for rec in risk.get("actionable_recommendations", []):
-                story.append(Paragraph(f"• <b>[{rec.get('priority')} Priority] {rec.get('action')}:</b> {rec.get('guidance')}", body_style))
+                prio = html.escape(str(rec.get('priority', 'Medium')))
+                action = html.escape(str(rec.get('action', '')))
+                guidance = html.escape(str(rec.get('guidance', '')))
+                story.append(Paragraph(f"• <b>[{prio} Priority] {action}:</b> {guidance}", body_style))
                 story.append(Spacer(1, 4))
 
             doc.build(story)

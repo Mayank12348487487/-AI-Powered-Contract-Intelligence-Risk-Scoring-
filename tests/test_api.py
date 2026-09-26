@@ -181,3 +181,25 @@ def test_document_registry_eviction():
     assert reg.has("doc2")
     assert reg.has("doc4")
 
+def test_contract_export_with_special_characters():
+    contract_text = """RESEARCH & DEVELOPMENT AGREEMENT <CONFIDENTIAL>
+Between Johnson & Johnson Corp ("Provider") and AT&T Media LLC ("Customer").
+1. Effective Date: January 15, 2026.
+2. Limitation of Liability: Total aggregate liability capped at $100,000 USD for claims where damages < $500,000.
+3. Governing Law: State of New York.
+"""
+    upload_res = client.post(
+        "/api/contracts/upload",
+        data={"raw_text": contract_text, "contract_name": "R&D <Alpha & Beta> Agreement.txt"}
+    )
+    assert upload_res.status_code == 200
+    doc_id = upload_res.json()["doc_id"]
+
+    res_pdf = client.get(f"/api/contracts/{doc_id}/export/pdf")
+    assert res_pdf.status_code == 200
+    assert "application/pdf" in res_pdf.headers["content-type"] or "text/html" in res_pdf.headers["content-type"]
+
+    res_json = client.get(f"/api/contracts/{doc_id}/export/json")
+    assert res_json.status_code == 200
+
+
