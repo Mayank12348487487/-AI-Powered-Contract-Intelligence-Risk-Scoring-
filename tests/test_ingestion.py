@@ -29,3 +29,22 @@ This agreement shall be governed by the laws of the State of Delaware.
     headings = [s["heading"] for s in parsed["segments"]]
     assert any("SCOPE OF SERVICES" in h for h in headings)
     assert any("PAYMENT TERMS" in h for h in headings)
+
+def test_parse_text_empty_and_whitespace():
+    assert DocumentParser.normalize_text("") == ""
+    assert DocumentParser.normalize_text("   \r\n   ") == ""
+    assert DocumentParser.segment_clauses("") == []
+    assert DocumentParser.segment_clauses("   \n\n   ") == []
+
+def test_parse_file_image_and_markdown():
+    # Markdown
+    md_content = "# Section 1\nContract terms."
+    parsed_md = DocumentParser.parse_file("contract.md", md_content.encode('utf-8'))
+    assert parsed_md["format"] == "text"
+    assert parsed_md["total_segments"] >= 1
+
+    # WebP image extension router check
+    fake_webp_bytes = b"RIFF....WEBPVP8 ...."
+    parsed_webp = DocumentParser.parse_file("scan.webp", fake_webp_bytes)
+    assert parsed_webp["format"] == "image_ocr"
+

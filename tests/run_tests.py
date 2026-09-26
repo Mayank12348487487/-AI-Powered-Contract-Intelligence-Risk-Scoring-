@@ -16,9 +16,16 @@ def run_all():
 
     # 1. Ingestion
     print("\n[1/6] Testing Ingestion & Parsing...", end=" ", flush=True)
-    from tests.test_ingestion import test_text_normalization, test_clause_segmentation
+    from tests.test_ingestion import (
+        test_text_normalization,
+        test_clause_segmentation,
+        test_parse_text_empty_and_whitespace,
+        test_parse_file_image_and_markdown
+    )
     test_text_normalization()
     test_clause_segmentation()
+    test_parse_text_empty_and_whitespace()
+    test_parse_file_image_and_markdown()
     print("PASSED", flush=True)
 
     # 2. NER
@@ -59,12 +66,18 @@ def run_all():
         test_safe_mutual_nda_risk,
         test_critical_unfavorable_licensing_risk,
         test_expanded_anomaly_patterns,
-        test_termination_for_convenience_risk
+        test_termination_for_convenience_risk,
+        test_ner_extracts_governing_law,
+        test_ner_extracts_international_governing_law,
+        test_ner_extracts_governing_law_with_confidence
     )
     test_safe_mutual_nda_risk()
     test_critical_unfavorable_licensing_risk()
     test_expanded_anomaly_patterns()
     test_termination_for_convenience_risk()
+    test_ner_extracts_governing_law()
+    test_ner_extracts_international_governing_law()
+    test_ner_extracts_governing_law_with_confidence()
     print("PASSED", flush=True)
 
     # 5. Vector Math & Comparison Engines

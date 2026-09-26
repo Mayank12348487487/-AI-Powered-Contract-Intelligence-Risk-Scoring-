@@ -139,7 +139,7 @@ class DocumentParser:
             parsed = cls.parse_pdf(content_bytes)
         elif ext in [".docx", ".doc"]:
             parsed = cls.parse_docx(content_bytes)
-        elif ext in [".png", ".jpg", ".jpeg", ".tiff", ".bmp"]:
+        elif ext in [".png", ".jpg", ".jpeg", ".tiff", ".tif", ".bmp", ".webp"]:
             ocr_text = extract_text_from_image(content_bytes)
             parsed = cls.parse_text(ocr_text)
             parsed["format"] = "image_ocr"
