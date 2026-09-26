@@ -109,3 +109,13 @@ def test_ner_extracts_governing_law_with_confidence():
     assert entities["governing_law"] is not None
     assert entities["governing_law"]["jurisdiction"] == "California"
     assert entities["governing_law"]["confidence"] >= 0.9
+
+def test_ner_handles_missing_governing_law():
+    contract_text = """
+    SERVICE AGREEMENT
+    The parties agree to provide software services under this Agreement.
+    """
+
+    entities = ner_engine.extract_entities(contract_text)
+
+    assert entities["governing_law"] is None
