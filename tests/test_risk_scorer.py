@@ -119,3 +119,15 @@ def test_ner_handles_missing_governing_law():
     entities = ner_engine.extract_entities(contract_text)
 
     assert entities["governing_law"] is None
+
+def test_ner_extracts_governing_law_from_jurisdiction_clause():
+    contract_text = """
+    SERVICE AGREEMENT
+    The courts of the State of New York shall have exclusive jurisdiction
+    over any dispute arising under this Agreement.
+    """
+
+    entities = ner_engine.extract_entities(contract_text)
+
+    assert entities["governing_law"] is not None
+    assert entities["governing_law"]["jurisdiction"] == "New York"
