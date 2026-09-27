@@ -23,7 +23,47 @@ PARTY_ROLES = [
     "Distributor", "Reseller", "Author", "Publisher"
 ]
 
+# Combined precompiled regexes
+_SORTED_JURISDICTIONS = sorted(JURISDICTIONS, key=len, reverse=True)
+JURISDICTION_REGEX = re.compile(
+    r'\b(?:' + '|'.join(re.escape(j) for j in _SORTED_JURISDICTIONS) + r')\b',
+    re.IGNORECASE
+)
+
+_SORTED_ROLES = sorted(PARTY_ROLES, key=len, reverse=True)
+PARTY_ROLES_REGEX = re.compile(
+    r'[\"“\'](' + '|'.join(re.escape(r) for r in _SORTED_ROLES) + r')[\"”\']',
+    re.IGNORECASE
+)
+
+GOVERNING_LAW_PREFIX_REGEX = re.compile(
+    r'(?:governed\s+by(?:\s+the\s+laws\s+of)?|laws\s+of\s+(?:the\s+state\s+of|the\s+country\s+of)?|jurisdiction\s+of|exclusive\s+jurisdiction\s+of)\s+([A-Za-z\s\,\.]+)',
+    re.IGNORECASE
+)
+
+EFFECTIVE_DATE_REGEX = re.compile(
+    r'(?:effective\s+as\s+of|effective\s+date\s*(?:is|shall\s+be)?\s*[\:\-]?\s*)([A-Za-z0-9\s\,\-]+?\d{4})',
+    re.IGNORECASE
+)
+
+EXPIRATION_DATE_REGEX = re.compile(
+    r'(?:expir(?:e|es|ing|ation)|terminat(?:e|es|ing|ion)|end(?:s|ing)?)\s+(?:date\s+)?(?:on|is|shall\s+be)?\s*[\:\-]?\s*([A-Za-z0-9\s\,\-]+?\d{4})',
+    re.IGNORECASE
+)
+
+AGREEMENT_DATE_REGEX = re.compile(
+    r'(?:dated\s+as\s+of|entered\s+into\s+on\s+this)\s+([A-Za-z0-9\s\,\-]+?\d{4})',
+    re.IGNORECASE
+)
+
+PUNCT_CLEAN_REGEX = re.compile(r'[\,\.\s]+$')
+
 class LegalNER:
+    __slots__ = (
+        'date_regex', 'money_regex', 'notice_period_regex',
+        'payment_terms_regex', 'party_bracket_regex'
+    )
+
     def __init__(self):
         self._compile_regexes()
 
@@ -62,29 +102,36 @@ class LegalNER:
         """
         Extract structured legal entities from contract text.
         """
-        entities = {
-            "parties": self.extract_parties(full_text),
-            "effective_date": self.extract_effective_date(full_text),
-            "expiration_date": self.extract_expiration_date(full_text),
-            "agreement_date": self.extract_agreement_date(full_text),
-            "governing_law": self.extract_governing_law(full_text),
-            "monetary_values": self.extract_monetary_values(full_text),
-            "notice_periods": self.extract_notice_periods(full_text),
-            "payment_terms": self.extract_payment_terms(full_text),
-            "all_extracted_count": 0
-        }
+        parties = self.extract_parties(full_text)
+        eff_date = self.extract_effective_date(full_text)
+        exp_date = self.extract_expiration_date(full_text)
+        agr_date = self.extract_agreement_date(full_text)
+        gov_law = self.extract_governing_law(full_text)
+        monetary = self.extract_monetary_values(full_text)
+        notice_p = self.extract_notice_periods(full_text)
+        pay_terms = self.extract_payment_terms(full_text)
 
         total_count = (
-            len(entities["parties"]) +
-            (1 if entities["effective_date"] else 0) +
-            (1 if entities["expiration_date"] else 0) +
-            (1 if entities["governing_law"] else 0) +
-            len(entities["monetary_values"]) +
-            len(entities["notice_periods"]) +
-            len(entities["payment_terms"])
+            len(parties) +
+            (1 if eff_date else 0) +
+            (1 if exp_date else 0) +
+            (1 if gov_law else 0) +
+            len(monetary) +
+            len(notice_p) +
+            len(pay_terms)
         )
-        entities["all_extracted_count"] = total_count
-        return entities
+
+        return {
+            "parties": parties,
+            "effective_date": eff_date,
+            "expiration_date": exp_date,
+            "agreement_date": agr_date,
+            "governing_law": gov_law,
+            "monetary_values": monetary,
+            "notice_periods": notice_p,
+            "payment_terms": pay_terms,
+            "all_extracted_count": total_count
+        }
 
     def extract_parties(self, text: str) -> List[Dict[str, Any]]:
         """Extract contracting parties, roles, and corporate types from preamble/recitals."""
@@ -92,24 +139,20 @@ class LegalNER:
         parties = []
         seen_names = set()
 
-        # Look for "by and between ... and ..."
-        matches = self.party_bracket_regex.finditer(preamble)
-        for m in matches:
-            raw_name = m.group(1).strip()
-            # Clean up trailing punctuation
-            raw_name = re.sub(r'[\,\.\s]+$', '', raw_name)
+        for m in self.party_bracket_regex.finditer(preamble):
+            raw_name = PUNCT_CLEAN_REGEX.sub('', m.group(1).strip())
             role = m.group(2) if m.group(2) else None
             
-            if len(raw_name) > 3 and raw_name.lower() not in seen_names:
-                seen_names.add(raw_name.lower())
+            name_lower = raw_name.lower()
+            if len(raw_name) > 3 and name_lower not in seen_names:
+                seen_names.add(name_lower)
                 
                 # Check for role in nearby context if not captured
                 if not role:
                     context = preamble[max(0, m.start() - 30):min(len(preamble), m.end() + 50)]
-                    for r in PARTY_ROLES:
-                        if re.search(rf'[\"“\']{r}[\"”\']', context, re.IGNORECASE):
-                            role = r
-                            break
+                    role_match = PARTY_ROLES_REGEX.search(context)
+                    if role_match:
+                        role = role_match.group(1)
 
                 parties.append({
                     "name": raw_name,
@@ -123,7 +166,7 @@ class LegalNER:
 
     def extract_effective_date(self, text: str) -> Optional[Dict[str, Any]]:
         """Extract Effective Date."""
-        match = re.search(r'(?:effective\s+as\s+of|effective\s+date\s*(?:is|shall\s+be)?\s*[\:\-]?\s*)([A-Za-z0-9\s\,\-]+?\d{4})', text, re.IGNORECASE)
+        match = EFFECTIVE_DATE_REGEX.search(text)
         if match:
             date_str = match.group(1).strip()
             date_match = self.date_regex.search(date_str)
@@ -142,7 +185,7 @@ class LegalNER:
 
     def extract_expiration_date(self, text: str) -> Optional[Dict[str, Any]]:
         """Extract Expiration Date or fixed Term end date."""
-        match = re.search(r'(?:expir(?:e|es|ing|ation)|terminat(?:e|es|ing|ion)|end(?:s|ing)?)\s+(?:date\s+)?(?:on|is|shall\s+be)?\s*[\:\-]?\s*([A-Za-z0-9\s\,\-]+?\d{4})', text, re.IGNORECASE)
+        match = EXPIRATION_DATE_REGEX.search(text)
         if match:
             date_str = match.group(1).strip()
             date_match = self.date_regex.search(date_str)
@@ -156,7 +199,7 @@ class LegalNER:
 
     def extract_agreement_date(self, text: str) -> Optional[Dict[str, Any]]:
         """Extract Agreement Execution Date."""
-        match = re.search(r'(?:dated\s+as\s+of|entered\s+into\s+on\s+this)\s+([A-Za-z0-9\s\,\-]+?\d{4})', text[:2000], re.IGNORECASE)
+        match = AGREEMENT_DATE_REGEX.search(text[:2000])
         if match:
             date_str = match.group(1).strip()
             date_match = self.date_regex.search(date_str)
@@ -168,25 +211,25 @@ class LegalNER:
         return None
 
     def extract_governing_law(self, text: str) -> Optional[Dict[str, Any]]:
-        """Extract governing jurisdiction and applicable law."""
-        # Find governing law paragraph or sentence
-        law_match = re.search(r'(?:governed\s+by(?:\s+the\s+laws\s+of)?|laws\s+of\s+(?:the\s+state\s+of|the\s+country\s+of)?|jurisdiction\s+of|exclusive\s+jurisdiction\s+of)\s+([A-Za-z\s\,\.]+)', text, re.IGNORECASE)
+        """Extract governing jurisdiction and applicable law using fast precompiled regexes."""
+        law_match = GOVERNING_LAW_PREFIX_REGEX.search(text)
         found_jurisdiction = None
         
         # 1. Search inside explicit governing law clause context first
         if law_match:
             clause_context = law_match.group(0)
-            for state in JURISDICTIONS:
-                if re.search(rf'\b{re.escape(state)}\b', clause_context, re.IGNORECASE):
-                    found_jurisdiction = state
-                    break
+            jur_match = JURISDICTION_REGEX.search(clause_context)
+            if jur_match:
+                # Match canonical case from JURISDICTIONS
+                matched_val = jur_match.group(0).lower()
+                found_jurisdiction = next((j for j in JURISDICTIONS if j.lower() == matched_val), jur_match.group(0))
 
-        # 2. Fallback to searching across text
+        # 2. Fallback to searching across entire text
         if not found_jurisdiction:
-            for state in JURISDICTIONS:
-                if re.search(rf'\b{re.escape(state)}\b', text, re.IGNORECASE):
-                    found_jurisdiction = state
-                    break
+            jur_match = JURISDICTION_REGEX.search(text)
+            if jur_match:
+                matched_val = jur_match.group(0).lower()
+                found_jurisdiction = next((j for j in JURISDICTIONS if j.lower() == matched_val), jur_match.group(0))
 
         if found_jurisdiction:
             return {
@@ -200,21 +243,22 @@ class LegalNER:
         """Extract monetary caps, subscription fees, and liability amounts."""
         values = []
         seen = set()
+        text_len = len(text)
         for m in self.money_regex.finditer(text):
             val = m.group(0).strip()
             if val not in seen:
                 seen.add(val)
-                # Look at context around amount
                 start_idx = max(0, m.start() - 40)
-                end_idx = min(len(text), m.end() + 40)
+                end_idx = min(text_len, m.end() + 40)
                 snippet = text[start_idx:end_idx].replace('\n', ' ')
+                snippet_lower = snippet.lower()
                 
                 category = "Fee / Payment"
-                if re.search(r'liability|cap|damages|aggregate', snippet, re.IGNORECASE):
+                if "liability" in snippet_lower or "cap" in snippet_lower or "damages" in snippet_lower or "aggregate" in snippet_lower:
                     category = "Liability Cap"
-                elif re.search(r'minimum|guarantee|take-or-pay', snippet, re.IGNORECASE):
+                elif "minimum" in snippet_lower or "guarantee" in snippet_lower or "take-or-pay" in snippet_lower:
                     category = "Minimum Commitment"
-                elif re.search(r'penalty|liquidated', snippet, re.IGNORECASE):
+                elif "penalty" in snippet_lower or "liquidated" in snippet_lower:
                     category = "Liquidated Penalty"
 
                 values.append({
@@ -230,22 +274,24 @@ class LegalNER:
         """Extract notice periods (for termination, non-renewal, cure, audit)."""
         periods = []
         seen = set()
+        text_len = len(text)
         for m in self.notice_period_regex.finditer(text):
             val = m.group(0).strip()
             if val not in seen and len(val) > 2:
                 seen.add(val)
                 start_idx = max(0, m.start() - 40)
-                end_idx = min(len(text), m.end() + 40)
+                end_idx = min(text_len, m.end() + 40)
                 snippet = text[start_idx:end_idx].replace('\n', ' ')
+                snippet_lower = snippet.lower()
                 
                 purpose = "General Notice"
-                if re.search(r'renewal|non-renewal|renew', snippet, re.IGNORECASE):
+                if "renewal" in snippet_lower or "renew" in snippet_lower:
                     purpose = "Renewal / Non-Renewal Notice"
-                elif re.search(r'terminate|convenience|without\s+cause', snippet, re.IGNORECASE):
+                elif "terminate" in snippet_lower or "convenience" in snippet_lower or "without cause" in snippet_lower:
                     purpose = "Termination for Convenience"
-                elif re.search(r'cure|breach|default', snippet, re.IGNORECASE):
+                elif "cure" in snippet_lower or "breach" in snippet_lower or "default" in snippet_lower:
                     purpose = "Cure Period"
-                elif re.search(r'audit|inspect', snippet, re.IGNORECASE):
+                elif "audit" in snippet_lower or "inspect" in snippet_lower:
                     purpose = "Audit Notice"
 
                 periods.append({

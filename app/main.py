@@ -1,8 +1,10 @@
+import time
 import logging
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse
 
 from app.config import settings, BASE_DIR
@@ -23,6 +25,9 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+# Performance & Compression Middleware
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
 # CORS
 app.add_middleware(
     CORSMiddleware,
@@ -31,6 +36,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    """Measure request execution time and attach X-Process-Time header."""
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    process_time = time.perf_counter() - start_time
+    response.headers["X-Process-Time"] = f"{process_time * 1000:.2f}ms"
+    return response
 
 # Include API Router
 app.include_router(api_router, prefix=settings.API_PREFIX)

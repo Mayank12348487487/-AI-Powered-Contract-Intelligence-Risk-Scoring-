@@ -1,12 +1,66 @@
 import json
 import re
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 
 from app.config import DATA_DIR
 from app.core.vector_math import FastTFIDFVectorizer, sparse_cosine_similarity
 
 logger = logging.getLogger(__name__)
+
+# Precompiled high-accuracy phrase triggers
+PHRASE_TRIGGERS: Dict[str, Tuple[re.Pattern, float]] = {
+    "cap_on_liability": (
+        re.compile(r'aggregate liability|limitation of liability|exceed the total fees', re.IGNORECASE),
+        0.35
+    ),
+    "unlimited_liability": (
+        re.compile(r'unlimited liability|shall not be subject to any cap|uncapped', re.IGNORECASE),
+        0.40
+    ),
+    "non_compete": (
+        re.compile(r'non-compete|competing business|covenant not to compete', re.IGNORECASE),
+        0.40
+    ),
+    "ip_ownership_assignment": (
+        re.compile(r'assigns all right title|work made for hire|exclusive ownership', re.IGNORECASE),
+        0.35
+    ),
+    "mutual_indemnification": (
+        re.compile(r'each party shall indemnify|mutually defend|mutual indemn', re.IGNORECASE),
+        0.35
+    ),
+    "unilateral_indemnification": (
+        re.compile(r'indemnify, defend, and hold harmless licensor|contractor agrees to defend and indemnify client', re.IGNORECASE),
+        0.35
+    ),
+    "termination_for_convenience": (
+        re.compile(r'for convenience|without cause|terminate at will', re.IGNORECASE),
+        0.35
+    ),
+    "force_majeure": (
+        re.compile(r'force majeure|acts of god|war|disaster', re.IGNORECASE),
+        0.40
+    ),
+    "governing_law": (
+        re.compile(r'governed by|laws of the state|jurisdiction', re.IGNORECASE),
+        0.35
+    ),
+    "renewal_term": (
+        re.compile(r'automatically renew|renewal term|successive', re.IGNORECASE),
+        0.35
+    ),
+    "audit_rights": (
+        re.compile(r'right to audit|inspect books|independent auditor', re.IGNORECASE),
+        0.35
+    ),
+}
+
+ESSENTIAL_CATEGORIES = [
+    "parties", "effective_date", "expiration_date", "governing_law",
+    "cap_on_liability", "mutual_indemnification", "force_majeure",
+    "termination_for_convenience", "confidentiality"
+]
 
 class CUADClauseClassifier:
     def __init__(self):
@@ -15,6 +69,7 @@ class CUADClauseClassifier:
         self.category_map: Dict[str, Dict[str, Any]] = {}
         self.vectorizer: Optional[FastTFIDFVectorizer] = None
         self.category_embeddings: List[Dict[int, float]] = []
+        self.category_kw_regexes: Dict[str, Optional[re.Pattern]] = {}
         self._load_schema_and_initialize()
 
     def _load_schema_and_initialize(self):
@@ -24,6 +79,18 @@ class CUADClauseClassifier:
                 data = json.load(f)
                 self.categories = data.get("categories", [])
                 self.category_map = {c["id"]: c for c in self.categories}
+
+            # Precompile keyword patterns for fast multi-keyword matching
+            for c in self.categories:
+                cat_id = c["id"]
+                kws = c.get("keywords", [])
+                if kws:
+                    # Sort by length descending to match longest phrases first
+                    sorted_kws = sorted(kws, key=len, reverse=True)
+                    pattern = r'\b(?:' + '|'.join(re.escape(k.lower()) for k in sorted_kws) + r')\b'
+                    self.category_kw_regexes[cat_id] = re.compile(pattern, re.IGNORECASE)
+                else:
+                    self.category_kw_regexes[cat_id] = None
 
             # Build semantic corpus for TF-IDF / embedding matching
             corpus = []
@@ -55,40 +122,25 @@ class CUADClauseClassifier:
         query_vec = self.vectorizer.transform([cleaned])[0]
 
         matches = []
-        for idx, cat_vec in enumerate(self.category_embeddings):
+        cat_embeddings = self.category_embeddings
+        categories = self.categories
+        kw_regexes = self.category_kw_regexes
+
+        for idx, cat in enumerate(categories):
+            cat_vec = cat_embeddings[idx]
             sim = sparse_cosine_similarity(query_vec, cat_vec)
-            cat = self.categories[idx]
             cat_id = cat["id"]
             
-            # 2. Keyword & Heuristic Boosting
+            # 2. Fast Keyword Boosting via precompiled single pattern
             bonus = 0.0
-            for kw in cat.get("keywords", []):
-                if re.search(rf'\b{re.escape(kw.lower())}\b', cleaned):
-                    bonus += 0.18
+            kw_regex = kw_regexes.get(cat_id)
+            if kw_regex and kw_regex.search(cleaned):
+                bonus += 0.18
 
-            # Specific high-accuracy legal phrase triggers
-            if cat_id == "cap_on_liability" and re.search(r'aggregate liability|limitation of liability|exceed the total fees', cleaned):
-                bonus += 0.35
-            elif cat_id == "unlimited_liability" and re.search(r'unlimited liability|shall not be subject to any cap|uncapped', cleaned):
-                bonus += 0.40
-            elif cat_id == "non_compete" and re.search(r'non-compete|competing business|covenant not to compete', cleaned):
-                bonus += 0.40
-            elif cat_id == "ip_ownership_assignment" and re.search(r'assigns all right title|work made for hire|exclusive ownership', cleaned):
-                bonus += 0.35
-            elif cat_id == "mutual_indemnification" and re.search(r'each party shall indemnify|mutually defend|mutual indemn', cleaned):
-                bonus += 0.35
-            elif cat_id == "unilateral_indemnification" and re.search(r'indemnify, defend, and hold harmless licensor|contractor agrees to defend and indemnify client', cleaned):
-                bonus += 0.35
-            elif cat_id == "termination_for_convenience" and re.search(r'for convenience|without cause|terminate at will', cleaned):
-                bonus += 0.35
-            elif cat_id == "force_majeure" and re.search(r'force majeure|acts of god|war|disaster', cleaned):
-                bonus += 0.40
-            elif cat_id == "governing_law" and re.search(r'governed by|laws of the state|jurisdiction', cleaned):
-                bonus += 0.35
-            elif cat_id == "renewal_term" and re.search(r'automatically renew|renewal term|successive', cleaned):
-                bonus += 0.35
-            elif cat_id == "audit_rights" and re.search(r'right to audit|inspect books|independent auditor', cleaned):
-                bonus += 0.35
+            # 3. High-accuracy phrase triggers
+            trigger = PHRASE_TRIGGERS.get(cat_id)
+            if trigger and trigger[0].search(cleaned):
+                bonus += trigger[1]
 
             final_conf = min(0.99, float(sim * 0.55 + bonus))
             
@@ -115,10 +167,17 @@ class CUADClauseClassifier:
         for seg in segments:
             seg_copy = dict(seg)
             matches = self.classify_clause(seg["text"])
-            seg_copy["cuad_categories"] = matches
-            seg_copy["primary_category"] = matches[0]["name"] if matches else "General Contract Provisions"
-            seg_copy["primary_category_id"] = matches[0]["category_id"] if matches else "general"
-            seg_copy["category_confidence"] = matches[0]["confidence"] if matches else 0.0
+            if matches:
+                top_match = matches[0]
+                seg_copy["cuad_categories"] = matches
+                seg_copy["primary_category"] = top_match["name"]
+                seg_copy["primary_category_id"] = top_match["category_id"]
+                seg_copy["category_confidence"] = top_match["confidence"]
+            else:
+                seg_copy["cuad_categories"] = []
+                seg_copy["primary_category"] = "General Contract Provisions"
+                seg_copy["primary_category_id"] = "general"
+                seg_copy["category_confidence"] = 0.0
             enriched_segments.append(seg_copy)
         return enriched_segments
 
@@ -126,38 +185,37 @@ class CUADClauseClassifier:
         """
         Summarize which CUAD categories are present, their counts, and missing essential categories.
         """
-        detected = {}
+        detected: Dict[str, Dict[str, Any]] = {}
         for seg in enriched_segments:
             for m in seg.get("cuad_categories", []):
                 cat_id = m["category_id"]
-                if cat_id not in detected:
+                entry = detected.get(cat_id)
+                if entry is None:
                     detected[cat_id] = {
                         "category_id": cat_id,
                         "name": m["name"],
                         "importance": m["importance"],
-                        "count": 0,
-                        "highest_confidence": 0.0,
+                        "count": 1,
+                        "highest_confidence": m["confidence"],
                         "sample_segment_id": seg["id"]
                     }
-                detected[cat_id]["count"] += 1
-                detected[cat_id]["highest_confidence"] = max(detected[cat_id]["highest_confidence"], m["confidence"])
+                else:
+                    entry["count"] += 1
+                    if m["confidence"] > entry["highest_confidence"]:
+                        entry["highest_confidence"] = m["confidence"]
 
         # Check for missing essential categories (CUAD Atticus standard)
-        essential_categories = [
-            "parties", "effective_date", "expiration_date", "governing_law",
-            "cap_on_liability", "mutual_indemnification", "force_majeure",
-            "termination_for_convenience", "confidentiality"
-        ]
-
+        cat_map = self.category_map
         missing_essential = []
-        for cat_id in essential_categories:
-            if cat_id not in detected and cat_id in self.category_map:
+        for cat_id in ESSENTIAL_CATEGORIES:
+            if cat_id not in detected and cat_id in cat_map:
+                cat_info = cat_map[cat_id]
                 missing_essential.append({
                     "category_id": cat_id,
-                    "name": self.category_map[cat_id]["name"],
-                    "importance": self.category_map[cat_id].get("importance", "Essential"),
-                    "mitigation_guidance": self.category_map[cat_id].get("mitigation_guidance", ""),
-                    "standard_safe_clause": self.category_map[cat_id].get("standard_safe_clause", "")
+                    "name": cat_info["name"],
+                    "importance": cat_info.get("importance", "Essential"),
+                    "mitigation_guidance": cat_info.get("mitigation_guidance", ""),
+                    "standard_safe_clause": cat_info.get("standard_safe_clause", "")
                 })
 
         return {

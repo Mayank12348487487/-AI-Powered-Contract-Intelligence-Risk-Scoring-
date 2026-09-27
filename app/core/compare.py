@@ -79,21 +79,25 @@ class ContractComparator:
 
         clause_comparisons = []
         texts_b = [s["text"] for s in segs_b]
+        texts_a = [s["text"] for s in segs_a]
 
         if segs_a and texts_b:
             try:
                 vectorizer = FastTFIDFVectorizer(ngram_range=(1, 2), max_features=3000)
                 tfidf_b = vectorizer.fit_transform(texts_b)
-                for seg_a in segs_a:
-                    vec_a = vectorizer.transform([seg_a["text"]])[0]
-                    sims = [sparse_cosine_similarity(vec_a, vec_b) for vec_b in tfidf_b]
-                    
-                    if sims:
-                        best_sim = max(sims)
-                        best_match_idx = sims.index(best_sim)
-                    else:
-                        best_sim = 0.0
-                        best_match_idx = 0
+                # Batch transform all segs_a in a single call
+                tfidf_a = vectorizer.transform(texts_a)
+
+                for idx_a, seg_a in enumerate(segs_a):
+                    vec_a = tfidf_a[idx_a]
+                    best_sim = 0.0
+                    best_match_idx = 0
+
+                    for idx_b, vec_b in enumerate(tfidf_b):
+                        sim = sparse_cosine_similarity(vec_a, vec_b)
+                        if sim > best_sim:
+                            best_sim = sim
+                            best_match_idx = idx_b
 
                     if best_sim > 0.40:
                         seg_b = segs_b[best_match_idx]

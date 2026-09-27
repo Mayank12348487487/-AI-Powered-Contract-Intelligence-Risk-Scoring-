@@ -1,6 +1,6 @@
 import threading
 from collections import OrderedDict
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Callable
 
 class DocumentRegistry:
     """
@@ -11,9 +11,16 @@ class DocumentRegistry:
         self.max_documents = max(1, max_documents)
         self._store: OrderedDict[str, Dict[str, Any]] = OrderedDict()
         self._lock = threading.RLock()
+        self._eviction_callbacks: List[Callable[[str], None]] = []
+
+    def register_eviction_callback(self, callback: Callable[[str], None]) -> None:
+        """Register a callback function to be called when a document is evicted or deleted."""
+        with self._lock:
+            self._eviction_callbacks.append(callback)
 
     def set(self, doc_id: str, document_data: Dict[str, Any]) -> None:
         """Store or update a document in the registry, applying LRU eviction if full."""
+        evicted_ids = []
         with self._lock:
             if doc_id in self._store:
                 self._store.move_to_end(doc_id)
@@ -21,7 +28,16 @@ class DocumentRegistry:
             
             # Evict oldest if exceeding capacity
             while len(self._store) > self.max_documents:
-                self._store.popitem(last=False)
+                evicted_id, _ = self._store.popitem(last=False)
+                evicted_ids.append(evicted_id)
+
+        # Notify callbacks outside lock to avoid deadlock
+        for eid in evicted_ids:
+            for cb in self._eviction_callbacks:
+                try:
+                    cb(eid)
+                except Exception:
+                    pass
 
     def get(self, doc_id: str) -> Optional[Dict[str, Any]]:
         """Retrieve a document by ID and mark it as recently accessed."""
@@ -37,12 +53,20 @@ class DocumentRegistry:
             return doc_id in self._store
 
     def delete(self, doc_id: str) -> bool:
-        """Remove a document from the registry."""
+        """Remove a document from the registry and trigger eviction callbacks."""
+        deleted = False
         with self._lock:
             if doc_id in self._store:
                 del self._store[doc_id]
-                return True
-            return False
+                deleted = True
+
+        if deleted:
+            for cb in self._eviction_callbacks:
+                try:
+                    cb(doc_id)
+                except Exception:
+                    pass
+        return deleted
 
     def list_all(self) -> List[Dict[str, Any]]:
         """Return list of basic metadata for all currently stored documents."""
@@ -59,9 +83,17 @@ class DocumentRegistry:
             return summary
 
     def clear(self) -> None:
-        """Clear all stored documents."""
+        """Clear all stored documents and notify listeners."""
         with self._lock:
+            all_ids = list(self._store.keys())
             self._store.clear()
+
+        for eid in all_ids:
+            for cb in self._eviction_callbacks:
+                try:
+                    cb(eid)
+                except Exception:
+                    pass
 
     def __len__(self) -> int:
         with self._lock:

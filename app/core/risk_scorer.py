@@ -7,6 +7,11 @@ from app.core.clause_classifier import clause_classifier
 
 logger = logging.getLogger(__name__)
 
+AMBIGUITY_REGEX = re.compile(
+    r'\b(?:at\s+its\s+sole\s+option|in\s+its\s+absolute\s+discretion|without\s+limitation|as\s+determined\s+by)\b',
+    re.IGNORECASE
+)
+
 # High-Risk Phrase Anomaly Patterns
 ANOMALY_PATTERNS = [
     {
@@ -116,9 +121,6 @@ ANOMALY_PATTERNS = [
 ]
 
 class RiskScoringEngine:
-    def __init__(self):
-        pass
-
     def evaluate_contract_risk(
         self,
         full_text: str,
@@ -231,8 +233,7 @@ class RiskScoringEngine:
         pillar_3_score = min(20, operational_penalties)
 
         # 4. Evaluate Pillar 4: Ambiguity and Boilerplate Deviations (0-10 max)
-        ambiguity_penalties = 0
-        ambiguous_matches = re.findall(r'\b(?:at\s+its\s+sole\s+option|in\s+its\s+absolute\s+discretion|without\s+limitation|as\s+determined\s+by)\b', full_text, re.IGNORECASE)
+        ambiguous_matches = AMBIGUITY_REGEX.findall(full_text)
         ambiguity_penalties = min(10, len(ambiguous_matches) * 2)
         pillar_4_score = ambiguity_penalties
 

@@ -2,12 +2,15 @@ import logging
 from typing import List, Dict, Any, Optional
 
 from app.core.vector_math import FastTFIDFVectorizer, sparse_cosine_similarity
+from app.core.registry import document_registry
 
 logger = logging.getLogger(__name__)
 
 class ContractVectorStore:
     def __init__(self):
         self.documents: Dict[str, Dict[str, Any]] = {}
+        # Register for automatic eviction when registry evicts documents
+        document_registry.register_eviction_callback(self.remove_document)
 
     def index_document(self, doc_id: str, segments: List[Dict[str, Any]], filename: str):
         """
@@ -30,20 +33,30 @@ class ContractVectorStore:
         }
         logger.info("Indexed document %s with %d segments into vector store", doc_id, len(segments))
 
+    def remove_document(self, doc_id: str) -> bool:
+        """Evict indexed document from memory when pruned from document registry."""
+        if doc_id in self.documents:
+            del self.documents[doc_id]
+            logger.debug("Evicted document %s from vector store cache", doc_id)
+            return True
+        return False
+
     def semantic_search(self, doc_id: str, query: str, top_k: int = 4) -> List[Dict[str, Any]]:
         """
         Perform dense semantic vector search across document clauses.
         """
-        if doc_id not in self.documents or not query.strip():
+        doc_data = self.documents.get(doc_id)
+        if not doc_data or not query.strip():
             return []
 
-        doc_data = self.documents[doc_id]
         vectorizer = doc_data["vectorizer"]
         embeddings = doc_data["embeddings"]
         segments = doc_data["segments"]
 
         try:
             query_vec = vectorizer.transform([query])[0]
+            if not query_vec:
+                return []
 
             results = []
             for idx, seg_vec in enumerate(embeddings):
@@ -84,11 +97,11 @@ class ContractVectorStore:
 
         # 1. Direct Entity Matching if query asks for specific metadata
         if "liability" in q_lower or "cap" in q_lower or "maximum damages" in q_lower:
-            # Check search results first
             for r in search_results:
-                if "liability" in r["text"].lower() or "cap" in r["text"].lower():
+                r_text_lower = r["text"].lower()
+                if "liability" in r_text_lower or "cap" in r_text_lower:
                     relevant_clause = r
-                    if "unlimited" in r["text"].lower() or "uncapped" in r["text"].lower():
+                    if "unlimited" in r_text_lower or "uncapped" in r_text_lower:
                         answer = f"⚠️ **Critical Alert:** The liability in this contract is **Unlimited / Uncapped** ({r['heading']}). Counterparty has not agreed to standard liability limitations."
                     else:
                         answer = f"The limitation of liability clause ({r['heading']}) states: \"{r['text'][:250]}...\""
@@ -122,7 +135,8 @@ class ContractVectorStore:
         elif "non-compete" in q_lower or "compete" in q_lower or "competition" in q_lower:
             found = False
             for r in search_results:
-                if "non-compete" in r["text"].lower() or "compete" in r["text"].lower():
+                r_text_lower = r["text"].lower()
+                if "non-compete" in r_text_lower or "compete" in r_text_lower:
                     found = True
                     relevant_clause = r
                     answer = f"Non-compete covenant found in **{r['heading']}**: \"{r['text'][:280]}...\""
@@ -132,63 +146,72 @@ class ContractVectorStore:
 
         elif "indemnif" in q_lower or "hold harmless" in q_lower or "indemnity" in q_lower:
             for r in search_results:
-                if "indemnif" in r["text"].lower() or "hold harmless" in r["text"].lower():
+                r_text_lower = r["text"].lower()
+                if "indemnif" in r_text_lower or "hold harmless" in r_text_lower:
                     relevant_clause = r
                     answer = f"Indemnification provision ({r['heading']}): \"{r['text'][:300]}...\""
                     break
 
         elif "intellectual property" in q_lower or " ip " in f" {q_lower} " or "ownership" in q_lower or "patent" in q_lower or "copyright" in q_lower or "work made for hire" in q_lower:
             for r in search_results:
-                if any(k in r["text"].lower() for k in ["intellectual property", "ownership", "title", "license", "proprietary", "patent"]):
+                r_text_lower = r["text"].lower()
+                if any(k in r_text_lower for k in ("intellectual property", "ownership", "title", "license", "proprietary", "patent")):
                     relevant_clause = r
                     answer = f"Intellectual Property & Ownership provision ({r['heading']}): \"{r['text'][:300]}...\""
                     break
 
         elif "confidential" in q_lower or "trade secret" in q_lower or "nda" in q_lower or "non-disclosure" in q_lower:
             for r in search_results:
-                if "confidential" in r["text"].lower() or "disclosure" in r["text"].lower():
+                r_text_lower = r["text"].lower()
+                if "confidential" in r_text_lower or "disclosure" in r_text_lower:
                     relevant_clause = r
                     answer = f"Confidentiality & Non-Disclosure clause ({r['heading']}): \"{r['text'][:300]}...\""
                     break
 
         elif "audit" in q_lower or "inspect" in q_lower or "books and records" in q_lower:
             for r in search_results:
-                if "audit" in r["text"].lower() or "inspect" in r["text"].lower() or "records" in r["text"].lower():
+                r_text_lower = r["text"].lower()
+                if "audit" in r_text_lower or "inspect" in r_text_lower or "records" in r_text_lower:
                     relevant_clause = r
                     answer = f"Audit & Inspection Rights ({r['heading']}): \"{r['text'][:300]}...\""
                     break
 
         elif "warranty" in q_lower or "guarantee" in q_lower or "as is" in q_lower or "disclaimer" in q_lower:
             for r in search_results:
-                if any(k in r["text"].lower() for k in ["warrant", "as-is", "disclaimer", "merchantability", "fitness"]):
+                r_text_lower = r["text"].lower()
+                if any(k in r_text_lower for k in ("warrant", "as-is", "disclaimer", "merchantability", "fitness")):
                     relevant_clause = r
                     answer = f"Warranty & Disclaimer provision ({r['heading']}): \"{r['text'][:300]}...\""
                     break
 
         elif "force majeure" in q_lower or "act of god" in q_lower or "disaster" in q_lower or "pandemic" in q_lower:
             for r in search_results:
-                if any(k in r["text"].lower() for k in ["force majeure", "acts of god", "war", "disaster", "beyond reasonable control"]):
+                r_text_lower = r["text"].lower()
+                if any(k in r_text_lower for k in ("force majeure", "acts of god", "war", "disaster", "beyond reasonable control")):
                     relevant_clause = r
                     answer = f"Force Majeure provision ({r['heading']}): \"{r['text'][:300]}...\""
                     break
 
         elif "assign" in q_lower or "assignment" in q_lower or "transfer" in q_lower or "merger" in q_lower:
             for r in search_results:
-                if any(k in r["text"].lower() for k in ["assign", "transfer", "merger", "successor", "consent"]):
+                r_text_lower = r["text"].lower()
+                if any(k in r_text_lower for k in ("assign", "transfer", "merger", "successor", "consent")):
                     relevant_clause = r
                     answer = f"Assignment & Transfer provision ({r['heading']}): \"{r['text'][:300]}...\""
                     break
 
         elif "insurance" in q_lower or "coverage" in q_lower or "policy" in q_lower:
             for r in search_results:
-                if any(k in r["text"].lower() for k in ["insurance", "policy", "coverage", "liability insurance"]):
+                r_text_lower = r["text"].lower()
+                if any(k in r_text_lower for k in ("insurance", "policy", "coverage", "liability insurance")):
                     relevant_clause = r
                     answer = f"Insurance Requirements ({r['heading']}): \"{r['text'][:300]}...\""
                     break
 
         elif "payment" in q_lower or "fee" in q_lower or "invoice" in q_lower or "pricing" in q_lower:
             for r in search_results:
-                if any(k in r["text"].lower() for k in ["pay", "fee", "invoice", "net 30", "due date", "price"]):
+                r_text_lower = r["text"].lower()
+                if any(k in r_text_lower for k in ("pay", "fee", "invoice", "net 30", "due date", "price")):
                     relevant_clause = r
                     answer = f"Payment & Pricing Terms ({r['heading']}): \"{r['text'][:300]}...\""
                     break

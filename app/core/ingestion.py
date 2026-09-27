@@ -19,7 +19,26 @@ HEADER_PATTERNS = [
     re.compile(r'^([A-Za-z\s]{4,40}\s*\:)$')
 ]
 
+SECTION_NUM_REGEX = re.compile(
+    r'^(ARTICLE\s+[IVXLCDM0-9]+|SECTION\s+[0-9]+(?:\.[0-9]+)*|[0-9]+(?:\.[0-9]+)*)',
+    re.IGNORECASE
+)
+DOUBLE_NEWLINE_REGEX = re.compile(r'\n{2,}')
+MULTI_SPACE_REGEX = re.compile(r'[ \t]+')
+
+# Fast quote and dash normalization translation table
+QUOTE_DASH_TRANSLATION = str.maketrans({
+    '“': '"',
+    '”': '"',
+    '’': "'",
+    '‘': "'",
+    '—': '-',
+    '–': '-'
+})
+
 class DocumentSegment:
+    __slots__ = ('id', 'heading', 'section_number', 'text', 'char_start', 'char_end', 'page_number')
+
     def __init__(
         self,
         segment_id: int,
@@ -54,15 +73,15 @@ class DocumentSegment:
 class DocumentParser:
     @staticmethod
     def normalize_text(text: str) -> str:
-        """Clean quotes, dashes, spacing and carriage returns."""
+        """Clean quotes, dashes, spacing and carriage returns with fast vectorized translation."""
         if not text:
             return ""
-        # Replace smart quotes & dashes
-        text = text.replace('“', '"').replace('”', '"').replace('’', "'").replace('‘', "'")
-        text = text.replace('—', '-').replace('–', '-').replace('…', '...')
-        text = text.replace('\r\n', '\n').replace('\r', '\n')
-        # Replace multiple horizontal spaces but preserve single newlines
-        text = re.sub(r'[ \t]+', ' ', text)
+        # 1. Fast char translation for quotes & dashes
+        text = text.translate(QUOTE_DASH_TRANSLATION)
+        # 2. Multi-char string replacements
+        text = text.replace('…', '...').replace('\r\n', '\n').replace('\r', '\n')
+        # 3. Replace multiple horizontal spaces but preserve single newlines
+        text = MULTI_SPACE_REGEX.sub(' ', text)
         return text.strip()
 
     @classmethod
@@ -70,8 +89,8 @@ class DocumentParser:
         """Extract text and metadata from PDF bytes."""
         try:
             reader = pypdf.PdfReader(io.BytesIO(file_bytes))
-            full_text = ""
             pages_data = []
+            full_text_parts = []
             char_offset = 0
 
             for i, page in enumerate(reader.pages):
@@ -81,11 +100,11 @@ class DocumentParser:
                     # Scanned PDF fallback
                     ocr_text = extract_text_from_image(file_bytes)
                     if ocr_text:
-                        page_text = ocr_text
+                        page_text = cls.normalize_text(ocr_text)
                 
                 start = char_offset
-                full_text += page_text + "\n\n"
-                char_offset = len(full_text)
+                full_text_parts.append(page_text)
+                char_offset += len(page_text) + 2
                 pages_data.append({
                     "page_number": i + 1,
                     "text": page_text,
@@ -93,10 +112,11 @@ class DocumentParser:
                     "char_end": char_offset
                 })
 
+            full_text = "\n\n".join(full_text_parts).strip()
             return {
                 "format": "pdf",
                 "page_count": len(reader.pages),
-                "full_text": full_text.strip(),
+                "full_text": full_text,
                 "pages": pages_data
             }
         except Exception as e:
@@ -167,7 +187,7 @@ class DocumentParser:
         if not full_text.strip():
             return []
 
-        raw_blocks = re.split(r'\n{2,}', full_text)
+        raw_blocks = DOUBLE_NEWLINE_REGEX.split(full_text)
 
         # If text is single-newline formatted but contains numbered sections/headers, split along headers
         if len(raw_blocks) <= 1 and '\n' in full_text:
@@ -207,15 +227,13 @@ class DocumentParser:
             current_offset = block_end
 
             # Check if this block is or starts with a section header
-            first_line = cleaned_block.split('\n')[0].strip()
-            is_header = False
+            first_line = cleaned_block.split('\n', 1)[0].strip()
             for pattern in HEADER_PATTERNS:
                 match = pattern.match(first_line)
                 if match:
-                    is_header = True
                     current_heading = first_line
                     # Extract section number if present
-                    sec_match = re.search(r'^(ARTICLE\s+[IVXLCDM0-9]+|SECTION\s+[0-9]+(\.[0-9]+)*|[0-9]+(\.[0-9]+)*)', first_line, re.IGNORECASE)
+                    sec_match = SECTION_NUM_REGEX.search(first_line)
                     if sec_match:
                         current_section = sec_match.group(0)
                     break

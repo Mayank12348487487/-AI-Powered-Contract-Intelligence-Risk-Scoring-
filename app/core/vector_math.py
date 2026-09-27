@@ -27,11 +27,15 @@ STOPWORDS: Set[str] = {
     "yourself", "yourselves"
 }
 
+WORD_PATTERN = re.compile(r'[a-zA-Z0-9_\-]+')
+
 class FastTFIDFVectorizer:
     """
     High-performance, pure-Python TF-IDF vectorizer with n-grams and L2 normalization.
     Zero C-threading dependencies, ultra-fast and lightweight.
     """
+    __slots__ = ('ngram_range', 'max_features', 'vocab', 'idf', 'is_fitted')
+
     def __init__(self, ngram_range: Tuple[int, int] = (1, 2), max_features: int = 5000):
         self.ngram_range = ngram_range
         self.max_features = max_features
@@ -41,34 +45,34 @@ class FastTFIDFVectorizer:
 
     def tokenize(self, text: str) -> List[str]:
         """Extract unigrams and bigrams, filtering out single chars and stopwords."""
-        words = re.findall(r'[a-zA-Z0-9_\-]+', text.lower())
-        tokens = []
+        words = WORD_PATTERN.findall(text.lower())
         
         # 1. Unigrams
         filtered_words = [w for w in words if len(w) > 1 and w not in STOPWORDS]
-        tokens.extend(filtered_words)
+        n_filtered = len(filtered_words)
+        
+        if self.ngram_range[1] < 2 or n_filtered < 2:
+            return filtered_words
 
         # 2. Bigrams if requested
-        if self.ngram_range[1] >= 2 and len(filtered_words) >= 2:
-            for i in range(len(filtered_words) - 1):
-                tokens.append(f"{filtered_words[i]} {filtered_words[i+1]}")
-
+        tokens = list(filtered_words)
+        tokens.extend(f"{filtered_words[i]} {filtered_words[i+1]}" for i in range(n_filtered - 1))
         return tokens
 
     def fit_transform(self, corpus: List[str]) -> List[Dict[int, float]]:
-        """Fit vocabulary on corpus and return sparse vector representations."""
+        """Fit vocabulary on corpus and return sparse vector representations in a single pass."""
         n_docs = len(corpus)
         if n_docs == 0:
             return []
 
-        # 1. Document frequency
+        # 1. Single-pass tokenization and document frequency counting
         df: Counter = Counter()
-        doc_tokens_list = []
+        doc_tokens_list: List[List[str]] = []
         
         for doc in corpus:
-            tokens = set(self.tokenize(doc))
-            df.update(tokens)
-            doc_tokens_list.append(self.tokenize(doc))
+            tokens = self.tokenize(doc)
+            df.update(set(tokens))
+            doc_tokens_list.append(tokens)
 
         # 2. Build vocabulary of top features
         most_common = df.most_common(self.max_features)
@@ -77,47 +81,46 @@ class FastTFIDFVectorizer:
         # 3. Compute smooth IDF
         vocab_size = len(self.vocab)
         self.idf = [0.0] * vocab_size
+        log_n = math.log(1 + n_docs)
         for term, idx in self.vocab.items():
-            self.idf[idx] = math.log((1 + n_docs) / (1 + df[term])) + 1.0
+            self.idf[idx] = log_n - math.log(1 + df[term]) + 1.0
 
         self.is_fitted = True
 
         # 4. Transform corpus into unit-norm sparse vectors
-        vectors = []
-        for doc_tokens in doc_tokens_list:
-            vectors.append(self._transform_tokens(doc_tokens))
-        return vectors
+        return [self._transform_tokens(doc_tokens) for doc_tokens in doc_tokens_list]
 
     def transform(self, corpus: List[str]) -> List[Dict[int, float]]:
         """Transform new documents using fitted vocabulary."""
         if not self.is_fitted:
             raise ValueError("Vectorizer must be fitted before calling transform.")
         
-        vectors = []
-        for doc in corpus:
-            tokens = self.tokenize(doc)
-            vectors.append(self._transform_tokens(tokens))
-        return vectors
+        return [self._transform_tokens(self.tokenize(doc)) for doc in corpus]
 
     def _transform_tokens(self, tokens: List[str]) -> Dict[int, float]:
         """Convert token stream to normalized sparse vector."""
+        if not tokens:
+            return {}
+            
         tf = Counter(tokens)
         sparse_vec: Dict[int, float] = {}
         sq_sum = 0.0
+        vocab = self.vocab
+        idf = self.idf
 
         for term, count in tf.items():
-            if term in self.vocab:
-                idx = self.vocab[term]
+            idx = vocab.get(term)
+            if idx is not None:
                 # Sublinear TF scaling: 1 + log(tf)
-                val = (1.0 + math.log(count)) * self.idf[idx]
+                val = (1.0 + math.log(count)) * idf[idx]
                 sparse_vec[idx] = val
                 sq_sum += val * val
 
         # L2 Normalization
-        norm = math.sqrt(sq_sum) if sq_sum > 0 else 1.0
-        if norm > 0:
+        if sq_sum > 0:
+            norm = 1.0 / math.sqrt(sq_sum)
             for idx in sparse_vec:
-                sparse_vec[idx] /= norm
+                sparse_vec[idx] *= norm
 
         return sparse_vec
 
@@ -132,7 +135,8 @@ def sparse_cosine_similarity(vec_a: Dict[int, float], vec_b: Dict[int, float]) -
 
     dot_product = 0.0
     for idx, val_a in vec_a.items():
-        if idx in vec_b:
-            dot_product += val_a * vec_b[idx]
+        val_b = vec_b.get(idx)
+        if val_b is not None:
+            dot_product += val_a * val_b
 
     return max(0.0, min(1.0, dot_product))

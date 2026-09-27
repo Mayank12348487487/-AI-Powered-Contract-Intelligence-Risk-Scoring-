@@ -67,6 +67,13 @@ def load_and_analyze_sample(sample_id: str) -> Dict[str, Any]:
     if not sample_info:
         raise HTTPException(status_code=404, detail=f"Sample contract '{sample_id}' not found")
 
+    doc_id = f"sample_{sample_id}"
+    
+    # Fast path: Return from memory registry if already indexed
+    cached_doc = document_registry.get(doc_id)
+    if cached_doc and doc_id in vector_store.documents:
+        return cached_doc
+
     file_path = SAMPLES_DIR / sample_info["file_name"]
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Sample contract file not found on disk")
@@ -88,8 +95,6 @@ def load_and_analyze_sample(sample_id: str) -> Dict[str, Any]:
     risk_analysis = risk_engine.evaluate_contract_risk(
         parsed["full_text"], enriched_segments, entities
     )
-
-    doc_id = f"sample_{sample_id}"
     
     # Vector store index
     vector_store.index_document(doc_id, enriched_segments, sample_info["file_name"])
