@@ -1,6 +1,6 @@
 import math
 import re
-from typing import List, Dict, Tuple, Set
+from typing import List, Dict, Tuple, Set, Optional
 from collections import Counter
 
 # Standard English stopwords
@@ -29,10 +29,14 @@ STOPWORDS: Set[str] = {
 
 WORD_PATTERN = re.compile(r'[a-zA-Z0-9_\-]+')
 
+# Precomputed log table for fast sublinear TF scaling (1 + log(tf)) for counts 1..64
+_PRECOMPUTED_LOG_TF: Tuple[float, ...] = tuple(1.0 + math.log(i) for i in range(1, 65))
+_MAX_PRECOMPUTED_TF = 64
+
 class FastTFIDFVectorizer:
     """
-    High-performance, pure-Python TF-IDF vectorizer with n-grams and L2 normalization.
-    Zero C-threading dependencies, ultra-fast and lightweight.
+    High-performance, pure-Python TF-IDF vectorizer with n-grams, L2 normalization,
+    and lookup-accelerated sublinear TF scaling.
     """
     __slots__ = ('ngram_range', 'max_features', 'vocab', 'idf', 'is_fitted')
 
@@ -111,18 +115,75 @@ class FastTFIDFVectorizer:
         for term, count in tf.items():
             idx = vocab.get(term)
             if idx is not None:
-                # Sublinear TF scaling: 1 + log(tf)
-                val = (1.0 + math.log(count)) * idf[idx]
+                # Sublinear TF scaling with fast log table lookup
+                if count <= _MAX_PRECOMPUTED_TF:
+                    sublinear_tf = _PRECOMPUTED_LOG_TF[count - 1]
+                else:
+                    sublinear_tf = 1.0 + math.log(count)
+                val = sublinear_tf * idf[idx]
                 sparse_vec[idx] = val
                 sq_sum += val * val
 
         # L2 Normalization
-        if sq_sum > 0:
+        if sq_sum > 0.0:
             norm = 1.0 / math.sqrt(sq_sum)
             for idx in sparse_vec:
                 sparse_vec[idx] *= norm
 
         return sparse_vec
+
+
+class SparseInvertedIndex:
+    """
+    Inverted index mapping feature index -> list of (doc_index, weight) tuples.
+    Provides sub-millisecond sparse cosine similarity searches across large sets of documents.
+    """
+    __slots__ = ('postings', 'num_docs')
+
+    def __init__(self, doc_vectors: Optional[List[Dict[int, float]]] = None):
+        self.postings: Dict[int, List[Tuple[int, float]]] = {}
+        self.num_docs = 0
+        if doc_vectors:
+            self.build(doc_vectors)
+
+    def build(self, doc_vectors: List[Dict[int, float]]) -> None:
+        self.num_docs = len(doc_vectors)
+        self.postings.clear()
+        for doc_idx, vec in enumerate(doc_vectors):
+            for term_idx, weight in vec.items():
+                if term_idx not in self.postings:
+                    self.postings[term_idx] = []
+                self.postings[term_idx].append((doc_idx, weight))
+
+    def query(self, query_vec: Dict[int, float], top_k: int = 10, min_score: float = 0.0) -> List[Tuple[int, float]]:
+        """
+        Fast dot-product search against indexed documents using accumulator.
+        """
+        if not query_vec or self.num_docs == 0:
+            return []
+
+        # Sparse accumulation
+        scores: Dict[int, float] = {}
+        postings = self.postings
+
+        for term_idx, q_weight in query_vec.items():
+            postings_list = postings.get(term_idx)
+            if postings_list:
+                for doc_idx, d_weight in postings_list:
+                    scores[doc_idx] = scores.get(doc_idx, 0.0) + (q_weight * d_weight)
+
+        if not scores:
+            return []
+
+        # Filter by min_score and sort
+        scored_items = [
+            (doc_idx, min(1.0, max(0.0, score)))
+            for doc_idx, score in scores.items()
+            if score >= min_score
+        ]
+        scored_items.sort(key=lambda x: x[1], reverse=True)
+        return scored_items[:top_k]
+
 
 def sparse_cosine_similarity(vec_a: Dict[int, float], vec_b: Dict[int, float]) -> float:
     """Compute cosine similarity between two unit-normalized sparse vectors."""
@@ -140,3 +201,11 @@ def sparse_cosine_similarity(vec_a: Dict[int, float], vec_b: Dict[int, float]) -
             dot_product += val_a * val_b
 
     return max(0.0, min(1.0, dot_product))
+
+
+def batch_sparse_cosine_similarity(query_vec: Dict[int, float], vectors: List[Dict[int, float]]) -> List[float]:
+    """Compute cosine similarities of a query vector against a list of vectors."""
+    if not query_vec or not vectors:
+        return [0.0] * len(vectors)
+    return [sparse_cosine_similarity(query_vec, v) for v in vectors]
+

@@ -47,7 +47,7 @@ SAMPLE_METADATA = [
 ]
 
 @router.get("/cuad/categories")
-def get_cuad_categories() -> Dict[str, Any]:
+async def get_cuad_categories() -> Dict[str, Any]:
     """Retrieve full CUAD (Contract Understanding Atticus Dataset) 41 categories schema."""
     return {
         "cuad_version": "1.0",
@@ -56,12 +56,12 @@ def get_cuad_categories() -> Dict[str, Any]:
     }
 
 @router.get("/contracts/samples")
-def get_sample_contracts() -> List[Dict[str, Any]]:
+async def get_sample_contracts() -> List[Dict[str, Any]]:
     """Get list of curated sample contracts available for instant testing."""
     return SAMPLE_METADATA
 
 @router.get("/contracts/samples/{sample_id}")
-def load_and_analyze_sample(sample_id: str) -> Dict[str, Any]:
+async def load_and_analyze_sample(sample_id: str) -> Dict[str, Any]:
     """Load and perform instant full analysis on a pre-packaged sample contract."""
     sample_info = next((s for s in SAMPLE_METADATA if s["id"] == sample_id), None)
     if not sample_info:

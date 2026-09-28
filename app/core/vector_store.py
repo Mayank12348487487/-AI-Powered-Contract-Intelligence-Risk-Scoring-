@@ -1,7 +1,7 @@
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 
-from app.core.vector_math import FastTFIDFVectorizer, sparse_cosine_similarity
+from app.core.vector_math import FastTFIDFVectorizer, SparseInvertedIndex, sparse_cosine_similarity
 from app.core.registry import document_registry
 
 logger = logging.getLogger(__name__)
@@ -9,12 +9,13 @@ logger = logging.getLogger(__name__)
 class ContractVectorStore:
     def __init__(self):
         self.documents: Dict[str, Dict[str, Any]] = {}
+        self._query_cache: Dict[Tuple[str, str, int], List[Dict[str, Any]]] = {}
         # Register for automatic eviction when registry evicts documents
         document_registry.register_eviction_callback(self.remove_document)
 
     def index_document(self, doc_id: str, segments: List[Dict[str, Any]], filename: str):
         """
-        Build vector index for a document's segments.
+        Build vector index and inverted posting list for a document's segments.
         """
         texts = [s["text"] for s in segments]
         if not texts:
@@ -22,6 +23,7 @@ class ContractVectorStore:
 
         vectorizer = FastTFIDFVectorizer(ngram_range=(1, 2), max_features=3000)
         embeddings = vectorizer.fit_transform(texts)
+        inv_index = SparseInvertedIndex(embeddings)
 
         self.documents[doc_id] = {
             "doc_id": doc_id,
@@ -29,51 +31,70 @@ class ContractVectorStore:
             "segments": segments,
             "vectorizer": vectorizer,
             "embeddings": embeddings,
+            "inv_index": inv_index,
             "total_segments": len(segments)
         }
+        # Invalidate any previous query cache for this doc
+        self._invalidate_doc_cache(doc_id)
         logger.info("Indexed document %s with %d segments into vector store", doc_id, len(segments))
 
     def remove_document(self, doc_id: str) -> bool:
-        """Evict indexed document from memory when pruned from document registry."""
+        """Evict indexed document and cached queries from memory when pruned from document registry."""
+        self._invalidate_doc_cache(doc_id)
         if doc_id in self.documents:
             del self.documents[doc_id]
             logger.debug("Evicted document %s from vector store cache", doc_id)
             return True
         return False
 
+    def _invalidate_doc_cache(self, doc_id: str):
+        keys_to_remove = [k for k in self._query_cache if k[0] == doc_id]
+        for k in keys_to_remove:
+            self._query_cache.pop(k, None)
+
     def semantic_search(self, doc_id: str, query: str, top_k: int = 4) -> List[Dict[str, Any]]:
         """
-        Perform dense semantic vector search across document clauses.
+        Perform high-speed inverted index vector search across document clauses.
         """
-        doc_data = self.documents.get(doc_id)
-        if not doc_data or not query.strip():
+        clean_query = query.strip()
+        if not clean_query:
             return []
 
+        doc_data = self.documents.get(doc_id)
+        if not doc_data:
+            return []
+
+        cache_key = (doc_id, clean_query.lower(), top_k)
+        if cache_key in self._query_cache:
+            return self._query_cache[cache_key]
+
         vectorizer = doc_data["vectorizer"]
-        embeddings = doc_data["embeddings"]
+        inv_index: SparseInvertedIndex = doc_data["inv_index"]
         segments = doc_data["segments"]
 
         try:
-            query_vec = vectorizer.transform([query])[0]
+            query_vec = vectorizer.transform([clean_query])[0]
             if not query_vec:
                 return []
 
+            matched = inv_index.query(query_vec, top_k=top_k, min_score=0.04)
             results = []
-            for idx, seg_vec in enumerate(embeddings):
-                sim = sparse_cosine_similarity(query_vec, seg_vec)
-                if sim > 0.04:
-                    seg = segments[idx]
-                    results.append({
-                        "segment_id": seg["id"],
-                        "heading": seg["heading"],
-                        "text": seg["text"],
-                        "page_number": seg.get("page_number", 1),
-                        "similarity_score": round(float(sim), 4),
-                        "primary_category": seg.get("primary_category", "General")
-                    })
+            for seg_idx, sim in matched:
+                seg = segments[seg_idx]
+                results.append({
+                    "segment_id": seg["id"],
+                    "heading": seg["heading"],
+                    "text": seg["text"],
+                    "page_number": seg.get("page_number", 1),
+                    "similarity_score": round(float(sim), 4),
+                    "primary_category": seg.get("primary_category", "General")
+                })
 
-            results.sort(key=lambda x: x["similarity_score"], reverse=True)
-            return results[:top_k]
+            # Bounded LRU cache size (max 256 entries)
+            if len(self._query_cache) > 256:
+                self._query_cache.pop(next(iter(self._query_cache)), None)
+            self._query_cache[cache_key] = results
+            return results
         except Exception as e:
             logger.error("Semantic search failed: %s", str(e))
             return []

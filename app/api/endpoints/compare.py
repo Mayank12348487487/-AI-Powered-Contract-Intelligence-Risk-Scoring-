@@ -12,7 +12,7 @@ class CompareRequest(BaseModel):
     doc_id_b: str
 
 @router.post("/contracts/compare")
-def compare_contracts(req: CompareRequest) -> Dict[str, Any]:
+async def compare_contracts(req: CompareRequest) -> Dict[str, Any]:
     """Compare two contracts, highlight clause drift, and analyze risk shifts."""
     contract_a = document_registry.get(req.doc_id_a)
     if not contract_a:

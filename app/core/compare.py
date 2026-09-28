@@ -83,21 +83,21 @@ class ContractComparator:
 
         if segs_a and texts_b:
             try:
+                from app.core.vector_math import SparseInvertedIndex
                 vectorizer = FastTFIDFVectorizer(ngram_range=(1, 2), max_features=3000)
                 tfidf_b = vectorizer.fit_transform(texts_b)
+                inv_index_b = SparseInvertedIndex(tfidf_b)
                 # Batch transform all segs_a in a single call
                 tfidf_a = vectorizer.transform(texts_a)
 
                 for idx_a, seg_a in enumerate(segs_a):
                     vec_a = tfidf_a[idx_a]
-                    best_sim = 0.0
-                    best_match_idx = 0
-
-                    for idx_b, vec_b in enumerate(tfidf_b):
-                        sim = sparse_cosine_similarity(vec_a, vec_b)
-                        if sim > best_sim:
-                            best_sim = sim
-                            best_match_idx = idx_b
+                    matches = inv_index_b.query(vec_a, top_k=1, min_score=0.0)
+                    if matches:
+                        best_match_idx, best_sim = matches[0]
+                    else:
+                        best_sim = 0.0
+                        best_match_idx = 0
 
                     if best_sim > 0.40:
                         seg_b = segs_b[best_match_idx]

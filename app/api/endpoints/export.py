@@ -8,7 +8,7 @@ from app.core.registry import document_registry
 router = APIRouter()
 
 @router.get("/contracts/{doc_id}/export/json")
-def export_contract_json(doc_id: str):
+async def export_contract_json(doc_id: str):
     """Download the full JSON audit analysis for a document."""
     doc = document_registry.get(doc_id)
     if not doc:
@@ -25,7 +25,7 @@ def export_contract_json(doc_id: str):
     )
 
 @router.get("/contracts/{doc_id}/export/pdf")
-def export_contract_pdf(doc_id: str):
+async def export_contract_pdf(doc_id: str):
     """Download the executive PDF/HTML report for a document."""
     doc = document_registry.get(doc_id)
     if not doc:

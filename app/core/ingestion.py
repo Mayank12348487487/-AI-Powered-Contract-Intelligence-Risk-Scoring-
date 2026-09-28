@@ -11,13 +11,12 @@ from app.core.ocr import extract_text_from_image
 logger = logging.getLogger(__name__)
 
 # Common legal section patterns
-HEADER_PATTERNS = [
-    re.compile(r'^(ARTICLE\s+[IVXLCDM0-9]+[\.\:\-]?\s*.*)$', re.IGNORECASE),
-    re.compile(r'^(SECTION\s+[0-9]+(\.[0-9]+)*[\.\:\-]?\s*.*)$', re.IGNORECASE),
-    re.compile(r'^([0-9]+(?:\.[0-9]+)*[\.\:\-\)]\s*.*)$', re.IGNORECASE),
-    re.compile(r'^(RECITALS|WHEREAS|OPERATIVE PROVISIONS|SCHEDULE\s+[A-Z0-9]|EXHIBIT\s+[A-Z0-9]|ANNEX\s+[A-Z0-9])$', re.IGNORECASE),
-    re.compile(r'^([A-Za-z\s]{4,40}\s*\:)$')
-]
+HEADER_COMBINED_REGEX = re.compile(
+    r'^(?:ARTICLE\s+[IVXLCDM0-9]+[\.\:\-]?\s*.*|SECTION\s+[0-9]+(?:\.[0-9]+)*[\.\:\-]?\s*.*|[0-9]+(?:\.[0-9]+)*[\.\:\-\)]\s*.*|RECITALS|WHEREAS|OPERATIVE PROVISIONS|SCHEDULE\s+[A-Z0-9]|EXHIBIT\s+[A-Z0-9]|ANNEX\s+[A-Z0-9]|[A-Za-z\s]{4,40}\s*\:)$',
+    re.IGNORECASE
+)
+
+HEADER_PATTERNS = [HEADER_COMBINED_REGEX]
 
 SECTION_NUM_REGEX = re.compile(
     r'^(ARTICLE\s+[IVXLCDM0-9]+|SECTION\s+[0-9]+(?:\.[0-9]+)*|[0-9]+(?:\.[0-9]+)*)',

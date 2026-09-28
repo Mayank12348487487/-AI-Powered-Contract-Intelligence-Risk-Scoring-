@@ -15,7 +15,7 @@ class ChatRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=1000)
 
 @router.post("/contracts/{doc_id}/search")
-def search_contract_clauses(doc_id: str, req: SearchRequest) -> Dict[str, Any]:
+async def search_contract_clauses(doc_id: str, req: SearchRequest) -> Dict[str, Any]:
     """Execute dense semantic vector search across clauses in a contract."""
     if not document_registry.has(doc_id):
         raise HTTPException(status_code=404, detail=f"Document '{doc_id}' not found.")
@@ -33,7 +33,7 @@ def search_contract_clauses(doc_id: str, req: SearchRequest) -> Dict[str, Any]:
     }
 
 @router.post("/contracts/{doc_id}/chat")
-def chat_with_contract(doc_id: str, req: ChatRequest) -> Dict[str, Any]:
+async def chat_with_contract(doc_id: str, req: ChatRequest) -> Dict[str, Any]:
     """Legal Q&A Assistant: Ask questions about the contract in natural language."""
     doc = document_registry.get(doc_id)
     if not doc:

@@ -87,7 +87,8 @@ def run_all():
         test_tfidf_fit_transform_and_transform,
         test_unfitted_transform_raises,
         test_empty_corpus,
-        test_sparse_cosine_similarity
+        test_sparse_cosine_similarity,
+        test_sparse_inverted_index
     )
     from tests.test_compare import (
         test_compare_identical_contracts,
@@ -99,6 +100,7 @@ def run_all():
     test_unfitted_transform_raises()
     test_empty_corpus()
     test_sparse_cosine_similarity()
+    test_sparse_inverted_index()
     test_compare_identical_contracts()
     test_compare_divergent_contracts()
     test_compare_with_empty_data()

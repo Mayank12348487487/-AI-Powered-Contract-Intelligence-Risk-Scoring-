@@ -56,3 +56,34 @@ def test_sparse_cosine_similarity():
     # Empty vector should return 0.0
     assert sparse_cosine_similarity(vec_a, empty_vec) == 0.0
     assert sparse_cosine_similarity(empty_vec, vec_a) == 0.0
+
+def test_sparse_inverted_index():
+    from app.core.vector_math import SparseInvertedIndex, batch_sparse_cosine_similarity
+    
+    doc_vectors = [
+        {0: 0.8, 1: 0.6},
+        {1: 0.5, 2: 0.866},
+        {3: 1.0}
+    ]
+    index = SparseInvertedIndex(doc_vectors)
+    assert index.num_docs == 3
+    
+    # Query matching doc 0 and doc 1
+    query_vec = {1: 1.0}
+    results = index.query(query_vec, top_k=2)
+    assert len(results) == 2
+    matched_doc_indices = [r[0] for r in results]
+    assert 0 in matched_doc_indices
+    assert 1 in matched_doc_indices
+    
+    # Query with no overlap
+    empty_results = index.query({99: 1.0})
+    assert empty_results == []
+
+    # Batch cosine similarity
+    batch_sims = batch_sparse_cosine_similarity(query_vec, doc_vectors)
+    assert len(batch_sims) == 3
+    assert batch_sims[0] == pytest.approx(0.6, rel=1e-3)
+    assert batch_sims[1] == pytest.approx(0.5, rel=1e-3)
+    assert batch_sims[2] == 0.0
+

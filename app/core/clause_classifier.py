@@ -106,20 +106,10 @@ class CUADClauseClassifier:
             logger.error("Failed to initialize CUAD schema: %s", str(e))
             self.categories = []
 
-    def classify_clause(self, clause_text: str, top_k: int = 2) -> List[Dict[str, Any]]:
-        """
-        Classify a single contract clause against the 41 CUAD legal categories.
-        Returns top matched categories with confidence and guidance.
-        """
-        if not clause_text or not self.categories or self.vectorizer is None:
+    def _classify_with_vector(self, cleaned: str, query_vec: Dict[int, float], top_k: int = 2) -> List[Dict[str, Any]]:
+        """Internal helper to classify text using a precomputed query vector."""
+        if len(cleaned) < 15 or not query_vec:
             return []
-
-        cleaned = clause_text.strip().lower()
-        if len(cleaned) < 15:
-            return []
-
-        # 1. Semantic Similarity Match
-        query_vec = self.vectorizer.transform([cleaned])[0]
 
         matches = []
         cat_embeddings = self.category_embeddings
@@ -155,18 +145,54 @@ class CUADClauseClassifier:
                     "standard_safe_clause": cat.get("standard_safe_clause", "")
                 })
 
-        # Sort by confidence descending
         matches.sort(key=lambda x: x["confidence"], reverse=True)
         return matches[:top_k]
 
+    def classify_clause(self, clause_text: str, top_k: int = 2) -> List[Dict[str, Any]]:
+        """
+        Classify a single contract clause against the 41 CUAD legal categories.
+        Returns top matched categories with confidence and guidance.
+        """
+        if not clause_text or not self.categories or self.vectorizer is None:
+            return []
+
+        cleaned = clause_text.strip().lower()
+        if len(cleaned) < 15:
+            return []
+
+        # 1. Semantic Similarity Match
+        query_vec = self.vectorizer.transform([cleaned])[0]
+        return self._classify_with_vector(cleaned, query_vec, top_k=top_k)
+
     def classify_document_segments(self, segments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
-        Classify all segments in a document and enrich them with CUAD category metadata.
+        Classify all segments in a document with batch vector transformation for maximum throughput.
         """
+        if not segments:
+            return []
+
+        if not self.categories or self.vectorizer is None:
+            return [
+                {
+                    **seg,
+                    "cuad_categories": [],
+                    "primary_category": "General Contract Provisions",
+                    "primary_category_id": "general",
+                    "category_confidence": 0.0
+                }
+                for seg in segments
+            ]
+
+        cleaned_texts = [seg.get("text", "").strip().lower() for seg in segments]
+        query_vecs = self.vectorizer.transform(cleaned_texts)
+
         enriched_segments = []
-        for seg in segments:
+        for idx, seg in enumerate(segments):
             seg_copy = dict(seg)
-            matches = self.classify_clause(seg["text"])
+            cleaned = cleaned_texts[idx]
+            query_vec = query_vecs[idx]
+            
+            matches = self._classify_with_vector(cleaned, query_vec, top_k=2)
             if matches:
                 top_match = matches[0]
                 seg_copy["cuad_categories"] = matches

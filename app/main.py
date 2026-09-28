@@ -38,12 +38,19 @@ app.add_middleware(
 )
 
 @app.middleware("http")
-async def add_process_time_header(request: Request, call_next):
-    """Measure request execution time and attach X-Process-Time header."""
+async def add_process_time_and_cache_headers(request: Request, call_next):
+    """Measure request execution time and set HTTP caching headers."""
     start_time = time.perf_counter()
     response = await call_next(request)
     process_time = time.perf_counter() - start_time
     response.headers["X-Process-Time"] = f"{process_time * 1000:.2f}ms"
+    
+    # Cache static assets and static taxonomy
+    if request.url.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "public, max-age=86400"
+    elif request.url.path == "/api/cuad/categories":
+        response.headers["Cache-Control"] = "public, max-age=3600"
+        
     return response
 
 # Include API Router
