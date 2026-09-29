@@ -33,11 +33,13 @@ def run_all():
     from tests.test_ner import (
         test_ner_party_and_date_extraction,
         test_ner_international_entities,
-        test_ner_global_currencies_and_jurisdictions
+        test_ner_global_currencies_and_jurisdictions,
+        test_ner_payment_terms_and_notice_periods
     )
     test_ner_party_and_date_extraction()
     test_ner_international_entities()
     test_ner_global_currencies_and_jurisdictions()
+    test_ner_payment_terms_and_notice_periods()
     print("PASSED", flush=True)
 
     # 3. Clause Classification

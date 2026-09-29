@@ -47,7 +47,7 @@ EFFECTIVE_DATE_REGEX = re.compile(
 )
 
 EXPIRATION_DATE_REGEX = re.compile(
-    r'(?:expir(?:e|es|ing|ation)|terminat(?:e|es|ing|ion)|end(?:s|ing)?)\s+(?:date\s+)?(?:on|is|shall\s+be)?\s*[\:\-]?\s*([A-Za-z0-9\s\,\-]+?\d{4})',
+    r'(?:expir(?:e|es|ing|ation)|terminat(?:e|es|ing|ion)|end(?:s|ing)?)\s*(?:date\b)?\s*(?:on|is|shall\s+be)?\s*[\:\-]?\s*([A-Za-z0-9\s\,\-]+?\d{4})',
     re.IGNORECASE
 )
 

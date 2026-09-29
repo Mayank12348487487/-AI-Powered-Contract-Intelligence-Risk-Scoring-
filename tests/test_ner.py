@@ -60,3 +60,27 @@ Fees: Licensee shall pay €500,000 EUR on the Effective Date, ¥10,000,000 JPY 
     assert any("10,000,000" in amt for amt in amounts)
     assert any("250,000" in amt for amt in amounts)
 
+def test_ner_payment_terms_and_notice_periods():
+    text = """SERVICES AGREEMENT
+This Agreement is entered into on June 1, 2025, by and between Alpha Tech AG ("Provider") and Beta Corp ("Client").
+Expiration Date: May 31, 2028.
+Payment terms: Net 60. Client shall pay within 30 business days of invoice.
+Termination: Either party may terminate with ninety (90) calendar days notice.
+Governing Law: This agreement shall be governed by the laws of Switzerland.
+"""
+    entities = ner_engine.extract_entities(text)
+    payment_terms = entities["payment_terms"]
+    assert any("Net 60" in t or "30" in t for t in payment_terms)
+
+    notices = [n["duration"] for n in entities["notice_periods"]]
+    assert any("ninety" in n or "90" in n for n in notices)
+
+    assert entities["governing_law"] is not None
+    assert entities["governing_law"]["jurisdiction"] == "Switzerland"
+
+    assert entities["effective_date"] is not None
+    assert "2025" in entities["effective_date"]["value"]
+    assert entities["expiration_date"] is not None
+    assert "2028" in entities["expiration_date"]["value"]
+
+
