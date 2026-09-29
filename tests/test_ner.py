@@ -83,4 +83,15 @@ Governing Law: This agreement shall be governed by the laws of Switzerland.
     assert entities["expiration_date"] is not None
     assert "2028" in entities["expiration_date"]["value"]
 
+def test_ner_handles_governing_law_case_insensitively():
+    contract_text = """
+    AGREEMENT
+    THIS AGREEMENT SHALL BE GOVERNED BY THE LAWS OF INDIA.
+    """
+
+    entities = ner_engine.extract_entities(contract_text)
+
+    assert entities["governing_law"] is not None
+    assert entities["governing_law"]["jurisdiction"] == "India"
+
 
