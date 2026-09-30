@@ -199,6 +199,23 @@ The platform extracts structured entities with character offset mapping:
 - **Financial Values & Caps**: Trailing liability caps, subscription fees, payment terms (*Net 30*, *Net 45*), and penalty amounts.
 - **Notice Periods**: Timeframe durations for termination, cure, non-renewal, and audit notice.
 
+### NER Regression Testing
+
+The NER engine includes regression tests covering:
+
+- Contracting parties and legal entity names
+- Effective and expiration dates
+- Governing law and jurisdiction
+- Monetary values and global currencies
+- Payment terms such as `Net 30`, `Net 60`, and `Net 90`
+- Termination and notice periods
+- Case-insensitive governing-law extraction
+
+Run the NER test suite with:
+
+```bash
+python3 -m pytest tests/test_ner.py -v
+
 ---
 
 ## Semantic Vector Search & Legal Q&A Chatbot
@@ -445,3 +462,16 @@ Four curated real-world legal contracts covering varied commercial risk profiles
 ## License
 
 Distributed under the **MIT License**. See `LICENSE` for more information.
+
+### NER Regression Testing
+
+The NER engine includes regression tests covering:
+
+- Contracting parties and legal entity names
+- Effective and expiration dates
+- Governing law and jurisdiction
+- Monetary values and global currencies
+- Payment terms such as `Net 30`, `Net 60`, and `Net 90`
+- Termination and notice periods
+- Case-insensitive governing-law extraction
+
