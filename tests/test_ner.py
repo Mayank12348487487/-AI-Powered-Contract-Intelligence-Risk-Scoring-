@@ -94,4 +94,16 @@ def test_ner_handles_governing_law_case_insensitively():
     assert entities["governing_law"] is not None
     assert entities["governing_law"]["jurisdiction"] == "India"
 
+def test_ner_extracts_net_payment_term():
+    contract_text = """
+    PAYMENT AGREEMENT
+    The customer shall pay all invoices under Net 90 payment terms.
+    """
+
+    entities = ner_engine.extract_entities(contract_text)
+
+    payment_terms = entities["payment_terms"]
+
+    assert any("Net 90" in term for term in payment_terms)
+
 
