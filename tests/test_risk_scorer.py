@@ -142,3 +142,24 @@ def test_ner_extracts_governing_law_with_laws_of_wording():
 
     assert entities["governing_law"] is not None
     assert entities["governing_law"]["jurisdiction"] == "India"
+
+def test_additional_high_risk_anomalies():
+    contract_text = """PLATFORM AND DATA LICENSE
+1. Provider may increase pricing at any time without notice.
+2. No event of force majeure shall excuse Customer from paying fees.
+3. Licensor is granted a perpetual irrevocable worldwide license to all customer data.
+4. Customer shall pay liquidated damages equal to 200% of the shortfall.
+"""
+    parsed = DocumentParser.parse_file("data_license.txt", contract_text.encode("utf-8"))
+    entities = ner_engine.extract_entities(contract_text)
+    enriched = clause_classifier.classify_document_segments(parsed["segments"])
+    risk = risk_engine.evaluate_contract_risk(contract_text, enriched, entities)
+
+    categories_flagged = [a["category"] for a in risk["anomalies"]]
+    assert "Unilateral Price Increase Rights" in categories_flagged
+    assert "Disallowance of Force Majeure Relief" in categories_flagged
+    assert "Perpetual & Irrevocable Data License" in categories_flagged
+    assert "Harsh Liquidated Damages / Penalties" in categories_flagged
+    assert risk["composite_score"] >= 60
+
+

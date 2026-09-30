@@ -57,5 +57,17 @@ def test_classify_governing_law():
     cat_ids = [m["category_id"] for m in matches]
     assert "governing_law" in cat_ids
 
+def test_classify_audit_rights():
+    text = "Licensor shall have the right to audit and inspect books and records upon reasonable prior notice."
+    matches = clause_classifier.classify_clause(text)
+    assert len(matches) > 0
+    cat_ids = [m["category_id"] for m in matches]
+    assert "audit_rights" in cat_ids
 
+def test_classify_renewal_term():
+    text = "This Agreement shall automatically renew for successive one (1) year renewal terms unless terminated."
+    matches = clause_classifier.classify_clause(text)
+    assert len(matches) > 0
+    cat_ids = [m["category_id"] for m in matches]
+    assert "renewal_term" in cat_ids
 

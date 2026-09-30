@@ -51,7 +51,10 @@ def run_all():
         test_classify_indemnity,
         test_classify_unlimited_liability,
         test_classify_force_majeure,
-        test_classify_termination_for_convenience
+        test_classify_termination_for_convenience,
+        test_classify_governing_law,
+        test_classify_audit_rights,
+        test_classify_renewal_term
     )
     test_cuad_categories_loaded()
     test_classify_liability_clause()
@@ -60,6 +63,9 @@ def run_all():
     test_classify_unlimited_liability()
     test_classify_force_majeure()
     test_classify_termination_for_convenience()
+    test_classify_governing_law()
+    test_classify_audit_rights()
+    test_classify_renewal_term()
     print("PASSED", flush=True)
 
     # 4. Risk Scorer
@@ -71,7 +77,11 @@ def run_all():
         test_termination_for_convenience_risk,
         test_ner_extracts_governing_law,
         test_ner_extracts_international_governing_law,
-        test_ner_extracts_governing_law_with_confidence
+        test_ner_extracts_governing_law_with_confidence,
+        test_ner_handles_missing_governing_law,
+        test_ner_extracts_governing_law_from_jurisdiction_clause,
+        test_ner_extracts_governing_law_with_laws_of_wording,
+        test_additional_high_risk_anomalies
     )
     test_safe_mutual_nda_risk()
     test_critical_unfavorable_licensing_risk()
@@ -80,6 +90,10 @@ def run_all():
     test_ner_extracts_governing_law()
     test_ner_extracts_international_governing_law()
     test_ner_extracts_governing_law_with_confidence()
+    test_ner_handles_missing_governing_law()
+    test_ner_extracts_governing_law_from_jurisdiction_clause()
+    test_ner_extracts_governing_law_with_laws_of_wording()
+    test_additional_high_risk_anomalies()
     print("PASSED", flush=True)
 
     # 5. Vector Math & Comparison Engines
