@@ -106,4 +106,16 @@ def test_ner_extracts_net_payment_term():
 
     assert any("Net 90" in term for term in payment_terms)
 
+def test_ner_extracts_net_60_payment_term():
+    contract_text = """
+    SERVICE AGREEMENT
+    All invoices shall be payable within Net 60 payment terms.
+    """
+
+    entities = ner_engine.extract_entities(contract_text)
+
+    payment_terms = entities["payment_terms"]
+
+    assert any("Net 60" in term for term in payment_terms)
+
 
