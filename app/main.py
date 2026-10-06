@@ -62,6 +62,10 @@ if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 @app.get("/", include_in_schema=False)
+@app.get("/index.html", include_in_schema=False)
+@app.get("/ui", include_in_schema=False)
+@app.get("/app", include_in_schema=False)
+@app.get("/dashboard", include_in_schema=False)
 async def read_root():
     """Serve web application UI."""
     index_file = STATIC_DIR / "index.html"
