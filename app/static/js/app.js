@@ -12,6 +12,7 @@ class ContractApp {
         this.uploadMode = 'file'; // 'file' or 'paste'
         this.activeFilter = 'ALL';
         this.activeCuadFilter = 'ALL';
+        this.searchQuery = '';
         
         this.init();
     }
@@ -55,6 +56,13 @@ class ContractApp {
     handleAnalysisLoaded(analysisData) {
         this.currentAnalysis = analysisData;
         this.currentDocId = analysisData.doc_id;
+
+        // Reset search input
+        const searchInput = document.getElementById('clauseSearchInput');
+        if (searchInput) {
+            searchInput.value = '';
+            this.searchQuery = '';
+        }
 
         // Enable export button
         const exportBtn = document.getElementById('exportPdfBtn');
@@ -191,6 +199,8 @@ class ContractApp {
         escaped = escaped.replace(/(\$[\d,]+(?:\.\d{2})?(?:\s*(?:USD|million|billion))?)/g, '<span style="color:#38BDF8;font-weight:600;">$1</span>');
         // Highlight notice durations
         escaped = escaped.replace(/(\b\d+\s+(?:days|months|years|hours)\b)/gi, '<span style="color:#F59E0B;font-weight:600;">$1</span>');
+        // Highlight percentage values
+        escaped = escaped.replace(/(\b\d+(?:\.\d+)?%\b)/g, '<span style="color:#A78BFA;font-weight:600;">$1</span>');
         return escaped;
     }
 
@@ -438,28 +448,61 @@ class ContractApp {
         this.renderCuadTaxonomyTab();
     }
 
+    searchClauses(query) {
+        this.searchQuery = (query || '').toLowerCase().trim();
+        this.applyClauseFilters();
+    }
+
     filterHighlights(filterValue) {
         this.activeFilter = filterValue;
+        this.applyClauseFilters();
+    }
+
+    applyClauseFilters() {
         const cards = document.querySelectorAll('.clause-card');
+        let visibleCount = 0;
 
         cards.forEach(card => {
-            const catId = card.dataset.categoryId || '';
+            const catId = (card.dataset.categoryId || '').toLowerCase();
             const hasRisk = card.dataset.hasRisk === 'true';
+            const cardText = (card.textContent || '').toLowerCase();
 
-            if (filterValue === 'ALL') {
+            let matchesCategory = false;
+            if (this.activeFilter === 'ALL') {
+                matchesCategory = true;
+            } else if (this.activeFilter === 'HIGH_RISK') {
+                matchesCategory = hasRisk;
+            } else if (this.activeFilter === 'liability') {
+                matchesCategory = catId.includes('liability') || catId.includes('indemnif');
+            } else if (this.activeFilter === 'non_compete') {
+                matchesCategory = catId.includes('compete') || catId.includes('solicit');
+            } else if (this.activeFilter === 'termination') {
+                matchesCategory = catId.includes('terminat') || catId.includes('renewal');
+            } else if (this.activeFilter === 'ip') {
+                matchesCategory = catId.includes('ip') || catId.includes('license');
+            } else {
+                matchesCategory = true;
+            }
+
+            const matchesSearch = !this.searchQuery || cardText.includes(this.searchQuery);
+
+            if (matchesCategory && matchesSearch) {
                 card.style.display = 'block';
-            } else if (filterValue === 'HIGH_RISK') {
-                card.style.display = hasRisk ? 'block' : 'none';
-            } else if (filterValue === 'liability') {
-                card.style.display = (catId.includes('liability') || catId.includes('indemnif')) ? 'block' : 'none';
-            } else if (filterValue === 'non_compete') {
-                card.style.display = (catId.includes('compete') || catId.includes('solicit')) ? 'block' : 'none';
-            } else if (filterValue === 'termination') {
-                card.style.display = (catId.includes('terminat') || catId.includes('renewal')) ? 'block' : 'none';
-            } else if (filterValue === 'ip') {
-                card.style.display = (catId.includes('ip') || catId.includes('license')) ? 'block' : 'none';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
             }
         });
+
+        const countBadge = document.getElementById('docSegmentCount');
+        if (countBadge && this.currentAnalysis) {
+            const total = this.currentAnalysis.total_segments || 0;
+            if (this.activeFilter !== 'ALL' || this.searchQuery) {
+                countBadge.textContent = `${visibleCount} / ${total} Clauses`;
+            } else {
+                countBadge.textContent = `${total} Clauses`;
+            }
+        }
     }
 
     switchTab(tabId) {

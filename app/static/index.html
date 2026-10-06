@@ -181,6 +181,7 @@
                         <span id="docSegmentCount" class="count-badge">0 Clauses</span>
                     </div>
                     <div class="panel-actions">
+                        <input id="clauseSearchInput" type="text" class="custom-search-input" placeholder="Search clauses..." oninput="window.app.searchClauses(this.value)" />
                         <!-- Highlight filter dropdown -->
                         <select id="highlightFilter" class="custom-select-small" onchange="window.app.filterHighlights(this.value)">
                             <option value="ALL">Show All Highlights</option>
