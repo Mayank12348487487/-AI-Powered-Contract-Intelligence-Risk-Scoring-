@@ -181,7 +181,14 @@
                         <span id="docSegmentCount" class="count-badge">0 Clauses</span>
                     </div>
                     <div class="panel-actions">
-                        <input id="clauseSearchInput" type="text" class="custom-search-input" placeholder="Search clauses..." oninput="window.app.searchClauses(this.value)" />
+                        <div class="search-input-wrapper">
+                            <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input id="clauseSearchInput" type="text" class="custom-search-input" placeholder="Search clauses... (/)" oninput="window.app.searchClauses(this.value)" />
+                            <button id="clearSearchBtn" class="search-clear-btn" onclick="window.app.clearSearch()" style="display: none;" title="Clear search">✕</button>
+                        </div>
                         <!-- Highlight filter dropdown -->
                         <select id="highlightFilter" class="custom-select-small" onchange="window.app.filterHighlights(this.value)">
                             <option value="ALL">Show All Highlights</option>
@@ -370,7 +377,16 @@
                 <span class="drawer-badge" id="drawerCategoryBadge">Clause Analysis</span>
                 <div id="drawerHeading" class="drawer-heading">Section Title</div>
             </div>
-            <button class="drawer-close" onclick="window.app.closeDrawer()">✕</button>
+            <div class="drawer-actions">
+                <button class="drawer-copy-btn" onclick="window.app.copyCurrentDrawerClause()" title="Copy Full Clause Text">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    Copy
+                </button>
+                <button class="drawer-close" onclick="window.app.closeDrawer()">✕</button>
+            </div>
         </div>
         <div class="drawer-body">
             <div class="drawer-section">

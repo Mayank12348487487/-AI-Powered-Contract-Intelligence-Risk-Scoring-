@@ -13,12 +13,14 @@ class ContractApp {
         this.activeFilter = 'ALL';
         this.activeCuadFilter = 'ALL';
         this.searchQuery = '';
+        this.currentSelectedSegment = null;
         
         this.init();
     }
 
     async init() {
         console.log("Initializing Contract Intelligence Studio...");
+        this.setupKeyboardShortcuts();
         await this.fetchCuadSchema();
         // Automatically load default sample SaaS agreement for instant showcase
         await this.loadSample('saas_master_agreement');
@@ -183,7 +185,15 @@ class ContractApp {
             card.innerHTML = `
                 <div class="clause-card-header">
                     <div class="clause-heading">#${seg.id} ${this.escapeHtml(seg.heading)}</div>
-                    <span class="clause-cat-tag">${this.escapeHtml(primaryCat)}</span>
+                    <div class="clause-card-actions">
+                        <button class="clause-quick-copy-btn" title="Copy clause text" onclick="event.stopPropagation(); window.app.copyClauseText(${seg.id})">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                        <span class="clause-cat-tag">${this.escapeHtml(primaryCat)}</span>
+                    </div>
                 </div>
                 <div class="clause-text">${this.highlightEntitiesInText(seg.text)}</div>
             `;
@@ -205,6 +215,7 @@ class ContractApp {
     }
 
     selectClause(seg) {
+        this.currentSelectedSegment = seg;
         // Remove prior active classes
         document.querySelectorAll('.clause-card').forEach(el => el.classList.remove('active-selected'));
         const selectedCard = document.getElementById(`clause-card-${seg.id}`);
@@ -311,7 +322,10 @@ class ContractApp {
                     <div class="redline-action-box">
                         <div class="redline-label">Recommended Redline Replacement:</div>
                         <div style="color: var(--text-primary); margin-bottom: 6px;">"${this.escapeHtml(a.recommended_redline)}"</div>
-                        <button class="btn btn-secondary" style="font-size: 11px; padding: 3px 8px;" onclick="window.app.copyRedlineText('${this.escapeQuotes(a.recommended_redline)}')">📋 Copy Redline</button>
+                        <div class="anomaly-actions-row">
+                            <button class="btn btn-secondary" style="font-size: 11px; padding: 3px 8px;" onclick="window.app.copyRedlineText('${this.escapeQuotes(a.recommended_redline)}')">📋 Copy Redline</button>
+                            ${a.segment_id ? `<button class="btn btn-secondary" style="font-size: 11px; padding: 3px 8px;" onclick="window.app.jumpToClause(${a.segment_id})">🔍 Jump to Clause #${a.segment_id}</button>` : ''}
+                        </div>
                     </div>
                 </div>
             `;
@@ -450,6 +464,22 @@ class ContractApp {
 
     searchClauses(query) {
         this.searchQuery = (query || '').toLowerCase().trim();
+        const clearBtn = document.getElementById('clearSearchBtn');
+        if (clearBtn) {
+            clearBtn.style.display = this.searchQuery ? 'flex' : 'none';
+        }
+        this.applyClauseFilters();
+    }
+
+    clearSearch() {
+        const searchInput = document.getElementById('clauseSearchInput');
+        const clearBtn = document.getElementById('clearSearchBtn');
+        if (searchInput) {
+            searchInput.value = '';
+            searchInput.focus();
+        }
+        if (clearBtn) clearBtn.style.display = 'none';
+        this.searchQuery = '';
         this.applyClauseFilters();
     }
 
@@ -765,6 +795,71 @@ class ContractApp {
         if (!text) return;
         navigator.clipboard.writeText(text).then(() => {
             this.showToast("Redline language copied to clipboard! 📋", 2000);
+        });
+    }
+
+    copyCurrentDrawerClause() {
+        if (!this.currentSelectedSegment?.text) {
+            this.showToast("No clause selected to copy.", 2000);
+            return;
+        }
+        navigator.clipboard.writeText(this.currentSelectedSegment.text).then(() => {
+            this.showToast("Full clause text copied to clipboard! 📋", 2000);
+        });
+    }
+
+    copyClauseText(segmentId) {
+        const seg = this.currentAnalysis?.segments?.find(s => s.id === segmentId);
+        if (seg?.text) {
+            navigator.clipboard.writeText(seg.text).then(() => {
+                this.showToast(`Clause #${segmentId} copied to clipboard! 📋`, 2000);
+            });
+        }
+    }
+
+    jumpToClause(segmentId) {
+        const card = document.getElementById(`clause-card-${segmentId}`);
+        if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const seg = this.currentAnalysis?.segments?.find(s => s.id === segmentId);
+            if (seg) this.selectClause(seg);
+        }
+    }
+
+    setupKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+            const isTyping = activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select';
+
+            if (e.key === 'Escape') {
+                this.closeDrawer();
+                this.closeUploadModal();
+                if (activeTag === 'input') document.activeElement.blur();
+                return;
+            }
+
+            if ((e.key === '/' || (e.ctrlKey && e.key.toLowerCase() === 'k')) && !isTyping) {
+                e.preventDefault();
+                const searchInput = document.getElementById('clauseSearchInput');
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+                return;
+            }
+
+            if (!isTyping && ['1', '2', '3', '4', '5'].includes(e.key)) {
+                const tabs = ['riskTab', 'entitiesTab', 'cuadTab', 'chatTab', 'compareTab'];
+                const tabIdx = parseInt(e.key, 10) - 1;
+                if (tabIdx >= 0 && tabIdx < tabs.length) {
+                    this.switchTab(tabs[tabIdx]);
+                    const tabBtns = document.querySelectorAll('.tabs-nav .tab-btn');
+                    if (tabBtns[tabIdx]) {
+                        tabBtns.forEach(b => b.classList.remove('active'));
+                        tabBtns[tabIdx].classList.add('active');
+                    }
+                }
+            }
         });
     }
 
