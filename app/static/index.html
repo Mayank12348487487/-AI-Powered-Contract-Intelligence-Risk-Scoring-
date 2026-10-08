@@ -64,7 +64,10 @@
                 </svg>
                 Export Audit PDF
             </button>
-            <button id="themeToggleBtn" class="icon-btn" onclick="window.app.toggleTheme()" title="Toggle Dark/Light Mode">
+            <button id="shortcutsBtn" class="icon-btn" onclick="window.app.openShortcutsModal()" title="Keyboard Shortcuts (?)">
+                <span class="shortcuts-icon">⌨️</span>
+            </button>
+            <button id="themeToggleBtn" class="icon-btn" onclick="window.app.toggleTheme()" title="Toggle Dark/Light Mode (T)">
                 <span id="themeIcon">☀️</span>
             </button>
         </div>
@@ -366,6 +369,49 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="window.app.closeUploadModal()">Cancel</button>
                 <button id="submitUploadBtn" class="btn btn-primary" onclick="window.app.submitContractUpload()">Analyze Contract</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div id="shortcutsModal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) window.app.closeShortcutsModal()">
+        <div class="modal-card modal-card-sm glass-panel">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span style="margin-right: 6px;">⌨️</span> Keyboard Shortcuts
+                </div>
+                <button class="modal-close" onclick="window.app.closeShortcutsModal()">✕</button>
+            </div>
+            
+            <div class="shortcuts-grid">
+                <div class="shortcut-row">
+                    <div class="shortcut-desc">Focus Clause Search</div>
+                    <div class="shortcut-keys"><kbd>/</kbd> <span class="shortcut-or">or</span> <kbd>Ctrl</kbd>+<kbd>K</kbd></div>
+                </div>
+                <div class="shortcut-row">
+                    <div class="shortcut-desc">Switch Tabs (Risk, Entities, CUAD...)</div>
+                    <div class="shortcut-keys"><kbd>1</kbd> <span class="shortcut-or">to</span> <kbd>5</kbd></div>
+                </div>
+                <div class="shortcut-row">
+                    <div class="shortcut-desc">Upload Contract Modal</div>
+                    <div class="shortcut-keys"><kbd>U</kbd></div>
+                </div>
+                <div class="shortcut-row">
+                    <div class="shortcut-desc">Toggle Dark / Light Mode</div>
+                    <div class="shortcut-keys"><kbd>T</kbd></div>
+                </div>
+                <div class="shortcut-row">
+                    <div class="shortcut-desc">Close Drawers & Modals</div>
+                    <div class="shortcut-keys"><kbd>Esc</kbd></div>
+                </div>
+                <div class="shortcut-row">
+                    <div class="shortcut-desc">Open Shortcuts Cheat Sheet</div>
+                    <div class="shortcut-keys"><kbd>?</kbd></div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="window.app.closeShortcutsModal()">Dismiss</button>
             </div>
         </div>
     </div>

@@ -826,6 +826,16 @@ class ContractApp {
         }
     }
 
+    openShortcutsModal() {
+        const modal = document.getElementById('shortcutsModal');
+        if (modal) modal.style.display = 'flex';
+    }
+
+    closeShortcutsModal() {
+        const modal = document.getElementById('shortcutsModal');
+        if (modal) modal.style.display = 'none';
+    }
+
     setupKeyboardShortcuts() {
         document.addEventListener('keydown', (e) => {
             const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
@@ -834,6 +844,7 @@ class ContractApp {
             if (e.key === 'Escape') {
                 this.closeDrawer();
                 this.closeUploadModal();
+                this.closeShortcutsModal();
                 if (activeTag === 'input') document.activeElement.blur();
                 return;
             }
@@ -846,6 +857,31 @@ class ContractApp {
                     searchInput.select();
                 }
                 return;
+            }
+
+            if (!isTyping) {
+                if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+                    e.preventDefault();
+                    const modal = document.getElementById('shortcutsModal');
+                    if (modal && modal.style.display === 'flex') {
+                        this.closeShortcutsModal();
+                    } else {
+                        this.openShortcutsModal();
+                    }
+                    return;
+                }
+
+                if (e.key.toLowerCase() === 't') {
+                    e.preventDefault();
+                    this.toggleTheme();
+                    return;
+                }
+
+                if (e.key.toLowerCase() === 'u') {
+                    e.preventDefault();
+                    this.triggerUploadModal();
+                    return;
+                }
             }
 
             if (!isTyping && ['1', '2', '3', '4', '5'].includes(e.key)) {
