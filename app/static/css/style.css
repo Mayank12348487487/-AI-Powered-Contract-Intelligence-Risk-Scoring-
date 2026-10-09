@@ -613,6 +613,36 @@ body {
     cursor: pointer;
 }
 
+.font-size-controls {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.font-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 4px 7px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.font-btn:first-child {
+    border-right: 1px solid var(--border-color);
+}
+
+.font-btn:hover {
+    background: var(--border-hover);
+    color: var(--text-primary);
+}
+
 /* Document Viewer */
 .document-content-scrollable {
     flex: 1;
@@ -622,6 +652,27 @@ body {
     font-size: 13.5px;
     line-height: 1.7;
     background: var(--bg-secondary);
+    transition: font-size 0.2s ease, line-height 0.2s ease;
+}
+
+.document-content-scrollable.font-size-sm {
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.document-content-scrollable.font-size-md {
+    font-size: 13.5px;
+    line-height: 1.7;
+}
+
+.document-content-scrollable.font-size-lg {
+    font-size: 15px;
+    line-height: 1.75;
+}
+
+.document-content-scrollable.font-size-xl {
+    font-size: 16.5px;
+    line-height: 1.85;
 }
 
 .clause-card {
@@ -799,6 +850,25 @@ body {
 
 .tab-inner-header {
     margin-bottom: 16px;
+}
+
+.tab-inner-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.copy-brief-btn {
+    font-size: 11.5px;
+    padding: 5px 12px;
+    white-space: nowrap;
+    border-color: var(--border-color);
+}
+
+.copy-brief-btn:hover {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
 }
 
 .tab-title {

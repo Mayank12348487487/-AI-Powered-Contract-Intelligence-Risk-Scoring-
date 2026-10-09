@@ -56,7 +56,14 @@
                 </svg>
                 Upload Contract
             </button>
-            <button id="exportPdfBtn" class="btn btn-primary" onclick="window.app.exportReport('pdf')" disabled>
+            <button id="exportJsonBtn" class="btn btn-secondary" onclick="window.app.exportReport('json')" disabled title="Export raw JSON schema audit dataset (J)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                JSON Export
+            </button>
+            <button id="exportPdfBtn" class="btn btn-primary" onclick="window.app.exportReport('pdf')" disabled title="Export executive PDF / HTML audit report (E)">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="7 10 12 15 17 10"></polyline>
@@ -196,6 +203,11 @@
                             <input id="clauseSearchInput" type="text" class="custom-search-input" placeholder="Search clauses... (/)" oninput="window.app.searchClauses(this.value)" />
                             <button id="clearSearchBtn" class="search-clear-btn" onclick="window.app.clearSearch()" style="display: none;" title="Clear search">✕</button>
                         </div>
+                        <!-- Font Size Density Controls -->
+                        <div class="font-size-controls" title="Adjust clause text reading size (+ / -)">
+                            <button class="font-btn" onclick="window.app.adjustFontSize(-1)" title="Smaller text (-)">A-</button>
+                            <button class="font-btn" onclick="window.app.adjustFontSize(1)" title="Larger text (+)">A+</button>
+                        </div>
                         <!-- Highlight filter dropdown -->
                         <select id="highlightFilter" class="custom-select-small" onchange="window.app.filterHighlights(this.value)">
                             <option value="ALL">Show All Highlights</option>
@@ -209,7 +221,7 @@
                     </div>
                 </div>
 
-                <div id="documentContainer" class="document-content-scrollable">
+                <div id="documentContainer" class="document-content-scrollable font-size-md">
                     <div class="empty-state">
                         <div class="empty-icon">📄</div>
                         <div class="empty-title">No Document Loaded</div>
@@ -241,9 +253,18 @@
 
                 <!-- Tab 1: Risk & Redlines -->
                 <div id="riskTab" class="tab-pane active">
-                    <div class="tab-inner-header">
-                        <div class="tab-title">High-Risk Language & Mitigation Checklist</div>
-                        <div class="tab-subtitle">Identified compliance vulnerabilities with suggested standard fallback language.</div>
+                    <div class="tab-inner-header tab-inner-header-flex">
+                        <div>
+                            <div class="tab-title">High-Risk Language & Mitigation Checklist</div>
+                            <div class="tab-subtitle">Identified compliance vulnerabilities with suggested standard fallback language.</div>
+                        </div>
+                        <button id="copyBriefBtn" class="btn btn-secondary copy-brief-btn" onclick="window.app.copyExecutiveBriefing()" title="Copy Markdown executive audit summary to clipboard">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            Copy Summary Brief
+                        </button>
                     </div>
                     <div id="anomaliesList" class="anomalies-list-container">
                         <div class="empty-tab-hint">Load a contract to view high-risk triggers and negotiation redlines.</div>
@@ -404,6 +425,18 @@
                 <div class="shortcut-row">
                     <div class="shortcut-desc">Bookmark / Pin Active Clause</div>
                     <div class="shortcut-keys"><kbd>B</kbd></div>
+                </div>
+                <div class="shortcut-row">
+                    <div class="shortcut-desc">Export Audit PDF / HTML</div>
+                    <div class="shortcut-keys"><kbd>E</kbd></div>
+                </div>
+                <div class="shortcut-row">
+                    <div class="shortcut-desc">Export Raw JSON Dataset</div>
+                    <div class="shortcut-keys"><kbd>J</kbd></div>
+                </div>
+                <div class="shortcut-row">
+                    <div class="shortcut-desc">Zoom Document Text (+ / -)</div>
+                    <div class="shortcut-keys"><kbd>+</kbd> <span class="shortcut-or">/</span> <kbd>-</kbd></div>
                 </div>
                 <div class="shortcut-row">
                     <div class="shortcut-desc">Toggle Dark / Light Mode</div>
