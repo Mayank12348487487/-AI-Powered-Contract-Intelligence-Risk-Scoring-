@@ -14,6 +14,7 @@ class ContractApp {
         this.activeCuadFilter = 'ALL';
         this.searchQuery = '';
         this.currentSelectedSegment = null;
+        this.bookmarkedClauses = new Set();
         
         this.init();
     }
@@ -58,6 +59,7 @@ class ContractApp {
     handleAnalysisLoaded(analysisData) {
         this.currentAnalysis = analysisData;
         this.currentDocId = analysisData.doc_id;
+        this.bookmarkedClauses.clear();
 
         // Reset search input
         const searchInput = document.getElementById('clauseSearchInput');
@@ -162,21 +164,32 @@ class ContractApp {
         const container = document.getElementById('documentContainer');
         const countBadge = document.getElementById('docSegmentCount');
         const titleElem = document.getElementById('docViewTitle');
+        const wordCountElem = document.getElementById('docWordCount');
+        const readTimeElem = document.getElementById('docReadTime');
 
         if (titleElem) titleElem.textContent = data.filename || 'Contract Document';
         if (countBadge) countBadge.textContent = `${data.total_segments || 0} Clauses`;
+
+        // Calculate total word count and estimated reading time
+        const segments = data.segments || [];
+        const totalWords = segments.reduce((acc, seg) => acc + (seg.text ? seg.text.trim().split(/\s+/).length : 0), 0);
+        const readMins = Math.max(1, Math.ceil(totalWords / 200));
+
+        if (wordCountElem) wordCountElem.textContent = `${totalWords.toLocaleString()} Words`;
+        if (readTimeElem) readTimeElem.textContent = `~${readMins}m Read`;
+
         if (!container) return;
 
         container.innerHTML = '';
-        const segments = data.segments || [];
 
         segments.forEach((seg, index) => {
             const hasAnomaly = (data.risk_analysis?.anomalies || []).some(a => a.segment_id === seg.id);
+            const isBookmarked = this.bookmarkedClauses.has(seg.id);
             const primaryCat = seg.primary_category || 'General';
             const catId = seg.primary_category_id || 'general';
 
             const card = document.createElement('div');
-            card.className = `clause-card ${hasAnomaly ? 'has-risk' : ''}`;
+            card.className = `clause-card ${hasAnomaly ? 'has-risk' : ''} ${isBookmarked ? 'is-bookmarked' : ''}`;
             card.id = `clause-card-${seg.id}`;
             card.dataset.segmentId = seg.id;
             card.dataset.categoryId = catId;
@@ -186,6 +199,9 @@ class ContractApp {
                 <div class="clause-card-header">
                     <div class="clause-heading">#${seg.id} ${this.escapeHtml(seg.heading)}</div>
                     <div class="clause-card-actions">
+                        <button class="clause-bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" title="${isBookmarked ? 'Remove Bookmark' : 'Bookmark / Pin Clause'}" onclick="event.stopPropagation(); window.app.toggleClauseBookmark(${seg.id})">
+                            ${isBookmarked ? '★' : '☆'}
+                        </button>
                         <button class="clause-quick-copy-btn" title="Copy clause text" onclick="event.stopPropagation(); window.app.copyClauseText(${seg.id})">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -233,6 +249,25 @@ class ContractApp {
         if (heading) heading.textContent = seg.heading;
         if (badge) badge.textContent = seg.primary_category || 'Clause Details';
         if (rawText) rawText.textContent = seg.text;
+
+        // Update Drawer Bookmark State
+        const isBookmarked = this.bookmarkedClauses.has(seg.id);
+        const drawerBookmarkBtn = document.getElementById('drawerBookmarkBtn');
+        const drawerBookmarkIcon = document.getElementById('drawerBookmarkIcon');
+        const drawerBookmarkText = document.getElementById('drawerBookmarkText');
+        if (drawerBookmarkBtn) {
+            if (isBookmarked) {
+                drawerBookmarkBtn.classList.add('bookmarked');
+                if (drawerBookmarkIcon) drawerBookmarkIcon.textContent = '★';
+                if (drawerBookmarkText) drawerBookmarkText.textContent = 'Pinned';
+                drawerBookmarkBtn.title = 'Remove Bookmark';
+            } else {
+                drawerBookmarkBtn.classList.remove('bookmarked');
+                if (drawerBookmarkIcon) drawerBookmarkIcon.textContent = '☆';
+                if (drawerBookmarkText) drawerBookmarkText.textContent = 'Pin';
+                drawerBookmarkBtn.title = 'Bookmark / Pin Clause (B)';
+            }
+        }
 
         // CUAD Categories
         const matches = seg.cuad_categories || [];
@@ -500,6 +535,8 @@ class ContractApp {
             let matchesCategory = false;
             if (this.activeFilter === 'ALL') {
                 matchesCategory = true;
+            } else if (this.activeFilter === 'BOOKMARKED') {
+                matchesCategory = this.bookmarkedClauses.has(parseInt(card.dataset.segmentId, 10));
             } else if (this.activeFilter === 'HIGH_RISK') {
                 matchesCategory = hasRisk;
             } else if (this.activeFilter === 'liability') {
@@ -791,6 +828,62 @@ class ContractApp {
         window.open(`/api/contracts/${this.currentDocId}/export/${type}`, '_blank');
     }
 
+    toggleClauseBookmark(segmentId) {
+        const isBookmarked = this.bookmarkedClauses.has(segmentId);
+        const card = document.getElementById(`clause-card-${segmentId}`);
+        const btn = card?.querySelector('.clause-bookmark-btn');
+
+        if (isBookmarked) {
+            this.bookmarkedClauses.delete(segmentId);
+            if (card) card.classList.remove('is-bookmarked');
+            if (btn) {
+                btn.classList.remove('bookmarked');
+                btn.textContent = '☆';
+                btn.title = 'Bookmark / Pin Clause';
+            }
+            this.showToast(`Clause #${segmentId} unpinned`, 1800);
+        } else {
+            this.bookmarkedClauses.add(segmentId);
+            if (card) card.classList.add('is-bookmarked');
+            if (btn) {
+                btn.classList.add('bookmarked');
+                btn.textContent = '★';
+                btn.title = 'Remove Bookmark';
+            }
+            this.showToast(`Clause #${segmentId} pinned ⭐`, 1800);
+        }
+
+        // Update drawer if current segment matches
+        if (this.currentSelectedSegment && this.currentSelectedSegment.id === segmentId) {
+            const drawerBookmarkBtn = document.getElementById('drawerBookmarkBtn');
+            const drawerBookmarkIcon = document.getElementById('drawerBookmarkIcon');
+            const drawerBookmarkText = document.getElementById('drawerBookmarkText');
+            if (drawerBookmarkBtn) {
+                if (this.bookmarkedClauses.has(segmentId)) {
+                    drawerBookmarkBtn.classList.add('bookmarked');
+                    if (drawerBookmarkIcon) drawerBookmarkIcon.textContent = '★';
+                    if (drawerBookmarkText) drawerBookmarkText.textContent = 'Pinned';
+                    drawerBookmarkBtn.title = 'Remove Bookmark';
+                } else {
+                    drawerBookmarkBtn.classList.remove('bookmarked');
+                    if (drawerBookmarkIcon) drawerBookmarkIcon.textContent = '☆';
+                    if (drawerBookmarkText) drawerBookmarkText.textContent = 'Pin';
+                    drawerBookmarkBtn.title = 'Bookmark / Pin Clause (B)';
+                }
+            }
+        }
+
+        if (this.activeFilter === 'BOOKMARKED') {
+            this.applyClauseFilters();
+        }
+    }
+
+    toggleCurrentDrawerBookmark() {
+        if (this.currentSelectedSegment) {
+            this.toggleClauseBookmark(this.currentSelectedSegment.id);
+        }
+    }
+
     copyRedlineText(text) {
         if (!text) return;
         navigator.clipboard.writeText(text).then(() => {
@@ -867,6 +960,16 @@ class ContractApp {
                         this.closeShortcutsModal();
                     } else {
                         this.openShortcutsModal();
+                    }
+                    return;
+                }
+
+                if (e.key.toLowerCase() === 'b') {
+                    e.preventDefault();
+                    if (this.currentSelectedSegment) {
+                        this.toggleClauseBookmark(this.currentSelectedSegment.id);
+                    } else {
+                        this.showToast("Select a clause first to pin/bookmark it (B)", 2500);
                     }
                     return;
                 }

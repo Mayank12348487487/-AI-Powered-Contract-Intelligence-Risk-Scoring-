@@ -182,6 +182,10 @@
                         </svg>
                         <span id="docViewTitle">Document Clause Viewer</span>
                         <span id="docSegmentCount" class="count-badge">0 Clauses</span>
+                        <div class="doc-meta-pills" id="docMetaPills">
+                            <span id="docWordCount" class="count-badge count-badge-subtle">0 Words</span>
+                            <span id="docReadTime" class="count-badge count-badge-subtle">~0m Read</span>
+                        </div>
                     </div>
                     <div class="panel-actions">
                         <div class="search-input-wrapper">
@@ -195,6 +199,7 @@
                         <!-- Highlight filter dropdown -->
                         <select id="highlightFilter" class="custom-select-small" onchange="window.app.filterHighlights(this.value)">
                             <option value="ALL">Show All Highlights</option>
+                            <option value="BOOKMARKED">⭐ Bookmarked Only</option>
                             <option value="HIGH_RISK">⚠️ Flagged Risk Only</option>
                             <option value="liability">Liability & Indemnity</option>
                             <option value="non_compete">Non-Compete & Restrictive</option>
@@ -397,6 +402,10 @@
                     <div class="shortcut-keys"><kbd>U</kbd></div>
                 </div>
                 <div class="shortcut-row">
+                    <div class="shortcut-desc">Bookmark / Pin Active Clause</div>
+                    <div class="shortcut-keys"><kbd>B</kbd></div>
+                </div>
+                <div class="shortcut-row">
                     <div class="shortcut-desc">Toggle Dark / Light Mode</div>
                     <div class="shortcut-keys"><kbd>T</kbd></div>
                 </div>
@@ -424,6 +433,10 @@
                 <div id="drawerHeading" class="drawer-heading">Section Title</div>
             </div>
             <div class="drawer-actions">
+                <button id="drawerBookmarkBtn" class="drawer-copy-btn" onclick="window.app.toggleCurrentDrawerBookmark()" title="Bookmark / Pin Clause">
+                    <span id="drawerBookmarkIcon">☆</span>
+                    <span id="drawerBookmarkText">Pin</span>
+                </button>
                 <button class="drawer-copy-btn" onclick="window.app.copyCurrentDrawerClause()" title="Copy Full Clause Text">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
