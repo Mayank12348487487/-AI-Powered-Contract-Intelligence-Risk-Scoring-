@@ -16,6 +16,7 @@ class ContractApp {
         this.currentSelectedSegment = null;
         this.bookmarkedClauses = new Set();
         this.fontSizeLevel = 1; // 0: sm, 1: md, 2: lg, 3: xl
+        this.isCompactView = false;
         
         this.init();
     }
@@ -186,10 +187,17 @@ class ContractApp {
         container.innerHTML = '';
 
         segments.forEach((seg, index) => {
-            const hasAnomaly = (data.risk_analysis?.anomalies || []).some(a => a.segment_id === seg.id);
+            const anomaly = (data.risk_analysis?.anomalies || []).find(a => a.segment_id === seg.id);
+            const hasAnomaly = !!anomaly;
             const isBookmarked = this.bookmarkedClauses.has(seg.id);
             const primaryCat = seg.primary_category || 'General';
             const catId = seg.primary_category_id || 'general';
+
+            let riskBadgeHtml = '';
+            if (anomaly) {
+                const sev = (anomaly.severity || 'HIGH').toLowerCase();
+                riskBadgeHtml = `<span class="clause-risk-badge ${sev}" title="${this.escapeQuotes(anomaly.rationale)}">⚠️ ${anomaly.severity}</span>`;
+            }
 
             const card = document.createElement('div');
             card.className = `clause-card ${hasAnomaly ? 'has-risk' : ''} ${isBookmarked ? 'is-bookmarked' : ''}`;
@@ -200,7 +208,10 @@ class ContractApp {
 
             card.innerHTML = `
                 <div class="clause-card-header">
-                    <div class="clause-heading">#${seg.id} ${this.escapeHtml(seg.heading)}</div>
+                    <div class="clause-heading">
+                        <span>#${seg.id} ${this.escapeHtml(seg.heading)}</span>
+                        ${riskBadgeHtml}
+                    </div>
                     <div class="clause-card-actions">
                         <button class="clause-bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" title="${isBookmarked ? 'Remove Bookmark' : 'Bookmark / Pin Clause'}" onclick="event.stopPropagation(); window.app.toggleClauseBookmark(${seg.id})">
                             ${isBookmarked ? '★' : '☆'}
@@ -887,6 +898,36 @@ class ContractApp {
         }
     }
 
+    toggleViewDensity() {
+        this.isCompactView = !this.isCompactView;
+        const container = document.getElementById('documentContainer');
+        const btn = document.getElementById('viewDensityBtn');
+        const icon = document.getElementById('densityIcon');
+        const label = document.getElementById('densityLabel');
+
+        if (container) {
+            if (this.isCompactView) {
+                container.classList.add('compact-view');
+            } else {
+                container.classList.remove('compact-view');
+            }
+        }
+
+        if (btn) {
+            if (this.isCompactView) {
+                btn.classList.add('active');
+                if (icon) icon.textContent = '☰';
+                if (label) label.textContent = 'Expanded';
+                this.showToast("Clause View: Compact Skim Mode ▤", 1500);
+            } else {
+                btn.classList.remove('active');
+                if (icon) icon.textContent = '▤';
+                if (label) label.textContent = 'Compact';
+                this.showToast("Clause View: Detailed Expanded Mode ☰", 1500);
+            }
+        }
+    }
+
     adjustFontSize(delta) {
         const levels = ['font-size-sm', 'font-size-md', 'font-size-lg', 'font-size-xl'];
         this.fontSizeLevel = Math.max(0, Math.min(levels.length - 1, this.fontSizeLevel + delta));
@@ -1076,6 +1117,12 @@ class ContractApp {
                 if (e.key.toLowerCase() === 't') {
                     e.preventDefault();
                     this.toggleTheme();
+                    return;
+                }
+
+                if (e.key.toLowerCase() === 'v') {
+                    e.preventDefault();
+                    this.toggleViewDensity();
                     return;
                 }
 

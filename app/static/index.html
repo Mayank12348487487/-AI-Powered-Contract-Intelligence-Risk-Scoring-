@@ -208,6 +208,11 @@
                             <button class="font-btn" onclick="window.app.adjustFontSize(-1)" title="Smaller text (-)">A-</button>
                             <button class="font-btn" onclick="window.app.adjustFontSize(1)" title="Larger text (+)">A+</button>
                         </div>
+                        <!-- Density mode toggle -->
+                        <button id="viewDensityBtn" class="density-toggle-btn" onclick="window.app.toggleViewDensity()" title="Toggle Compact Skim / Full View (V)">
+                            <span id="densityIcon">▤</span>
+                            <span id="densityLabel">Compact</span>
+                        </button>
                         <!-- Highlight filter dropdown -->
                         <select id="highlightFilter" class="custom-select-small" onchange="window.app.filterHighlights(this.value)">
                             <option value="ALL">Show All Highlights</option>
@@ -437,6 +442,10 @@
                 <div class="shortcut-row">
                     <div class="shortcut-desc">Zoom Document Text (+ / -)</div>
                     <div class="shortcut-keys"><kbd>+</kbd> <span class="shortcut-or">/</span> <kbd>-</kbd></div>
+                </div>
+                <div class="shortcut-row">
+                    <div class="shortcut-desc">Toggle Compact / Full Clause View</div>
+                    <div class="shortcut-keys"><kbd>V</kbd></div>
                 </div>
                 <div class="shortcut-row">
                     <div class="shortcut-desc">Toggle Dark / Light Mode</div>
