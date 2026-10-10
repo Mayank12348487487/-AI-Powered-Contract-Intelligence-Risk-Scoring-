@@ -15,6 +15,7 @@ class ContractApp {
         this.searchQuery = '';
         this.currentSelectedSegment = null;
         this.bookmarkedClauses = new Set();
+        this.clauseNotes = new Map();
         this.fontSizeLevel = 1; // 0: sm, 1: md, 2: lg, 3: xl
         this.isCompactView = false;
         this.activePillar = null;
@@ -64,6 +65,18 @@ class ContractApp {
         this.currentDocId = analysisData.doc_id;
         this.bookmarkedClauses.clear();
         this.activePillar = null;
+
+        // Restore saved analyst notes from localStorage
+        this.clauseNotes.clear();
+        try {
+            const rawNotes = localStorage.getItem(`cuad_notes_${analysisData.doc_id}`);
+            if (rawNotes) {
+                const entries = JSON.parse(rawNotes);
+                this.clauseNotes = new Map(entries);
+            }
+        } catch (e) {
+            console.error("Failed to restore saved notes:", e);
+        }
 
         // Reset pillar rows active classes
         ['pillarRow1', 'pillarRow2', 'pillarRow3', 'pillarRow4'].forEach(id => {
@@ -295,6 +308,7 @@ class ContractApp {
             const anomaly = (data.risk_analysis?.anomalies || []).find(a => a.segment_id === seg.id);
             const hasAnomaly = !!anomaly;
             const isBookmarked = this.bookmarkedClauses.has(seg.id);
+            const hasNote = !!(this.clauseNotes.get(seg.id)?.trim());
             const primaryCat = seg.primary_category || 'General';
             const catId = seg.primary_category_id || 'general';
 
@@ -318,6 +332,7 @@ class ContractApp {
                         ${riskBadgeHtml}
                     </div>
                     <div class="clause-card-actions">
+                        <span id="clause-note-badge-${seg.id}" class="clause-note-badge" style="${hasNote ? 'display:inline-flex;' : 'display:none;'}" title="Has analyst audit note">📝 Note</span>
                         <button class="clause-bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" title="${isBookmarked ? 'Remove Bookmark' : 'Bookmark / Pin Clause'}" onclick="event.stopPropagation(); window.app.toggleClauseBookmark(${seg.id})">
                             ${isBookmarked ? '★' : '☆'}
                         </button>
@@ -364,10 +379,14 @@ class ContractApp {
         const riskBox = document.getElementById('drawerRiskInfo');
         const redlineBox = document.getElementById('drawerRedlineBox');
         const rawText = document.getElementById('drawerClauseText');
+        const noteInput = document.getElementById('drawerNoteText');
+        const noteStatus = document.getElementById('noteSaveStatus');
 
         if (heading) heading.textContent = seg.heading;
         if (badge) badge.textContent = seg.primary_category || 'Clause Details';
         if (rawText) rawText.textContent = seg.text;
+        if (noteInput) noteInput.value = this.clauseNotes.get(seg.id) || '';
+        if (noteStatus) noteStatus.style.display = 'none';
 
         // Update Drawer Bookmark State
         const isBookmarked = this.bookmarkedClauses.has(seg.id);
@@ -656,6 +675,8 @@ class ContractApp {
                 matchesCategory = true;
             } else if (this.activeFilter === 'BOOKMARKED') {
                 matchesCategory = this.bookmarkedClauses.has(parseInt(card.dataset.segmentId, 10));
+            } else if (this.activeFilter === 'ANNOTATED') {
+                matchesCategory = !!(this.clauseNotes.get(parseInt(card.dataset.segmentId, 10))?.trim());
             } else if (this.activeFilter === 'HIGH_RISK') {
                 matchesCategory = hasRisk;
             } else if (this.activeFilter === 'liability') {
@@ -1045,6 +1066,102 @@ class ContractApp {
         }
     }
 
+    saveCurrentClauseNote(text) {
+        if (!this.currentSelectedSegment) return;
+        const segId = this.currentSelectedSegment.id;
+        const trimmed = (text || '').trim();
+        if (trimmed) {
+            this.clauseNotes.set(segId, text);
+        } else {
+            this.clauseNotes.delete(segId);
+        }
+        if (this.currentDocId) {
+            try {
+                localStorage.setItem(`cuad_notes_${this.currentDocId}`, JSON.stringify(Array.from(this.clauseNotes.entries())));
+            } catch (e) {}
+        }
+        const badge = document.getElementById(`clause-note-badge-${segId}`);
+        if (badge) {
+            badge.style.display = trimmed ? 'inline-flex' : 'none';
+        }
+        const status = document.getElementById('noteSaveStatus');
+        if (status) {
+            status.textContent = trimmed ? 'Saved' : 'Cleared';
+            status.style.display = 'inline-block';
+            setTimeout(() => { if (status) status.style.display = 'none'; }, 1500);
+        }
+        if (this.activeFilter === 'ANNOTATED') {
+            this.applyClauseFilters();
+        }
+    }
+
+    clearCurrentClauseNote() {
+        const noteInput = document.getElementById('drawerNoteText');
+        if (noteInput) noteInput.value = '';
+        this.saveCurrentClauseNote('');
+        this.showToast("Analyst note cleared", 1500);
+    }
+
+    copyCurrentClauseNote() {
+        const noteInput = document.getElementById('drawerNoteText');
+        const text = noteInput ? noteInput.value.trim() : '';
+        if (!text) {
+            this.showToast("No note content to copy.", 1500);
+            return;
+        }
+        navigator.clipboard.writeText(text).then(() => {
+            this.showToast("Analyst note copied to clipboard! 📋", 1800);
+        });
+    }
+
+    copyAuditNotes() {
+        if (!this.currentAnalysis) {
+            this.showToast("No active contract loaded.", 2000);
+            return;
+        }
+
+        const a = this.currentAnalysis;
+        let md = `# Legal Audit Notes & Negotiation Memo: ${a.filename}\n`;
+        md += `Generated by Contract Intelligence AI on ${new Date().toLocaleDateString()}\n\n`;
+
+        let hasAnyNotes = false;
+        if (this.clauseNotes.size > 0) {
+            md += `## 1. Analyst Clause Annotations\n`;
+            this.clauseNotes.forEach((note, segId) => {
+                if (note && note.trim()) {
+                    hasAnyNotes = true;
+                    const seg = a.segments?.find(s => s.id === segId);
+                    md += `### Clause #${segId}: ${seg?.heading || 'Section'} [${seg?.primary_category || 'General'}]\n`;
+                    md += `**Analyst Memo:** ${note.trim()}\n`;
+                    if (seg?.text) {
+                        md += `> "${seg.text.substring(0, 240)}..."\n`;
+                    }
+                    md += `\n`;
+                }
+            });
+        }
+
+        if (this.bookmarkedClauses.size > 0) {
+            md += `## 2. Pinned / Bookmarked Clauses\n`;
+            this.bookmarkedClauses.forEach(segId => {
+                const seg = a.segments?.find(s => s.id === segId);
+                if (seg) {
+                    md += `- Clause #${segId} [${seg.primary_category || 'General'}]: ${seg.heading}\n`;
+                }
+            });
+            md += `\n`;
+        }
+
+        if (!hasAnyNotes && this.bookmarkedClauses.size === 0) {
+            this.showToast("No notes or bookmarks to export. Add a note in clause drawer (N) first.", 3000);
+            return;
+        }
+
+        navigator.clipboard.writeText(md).then(() => {
+            this.showToast("Audit notes & memos copied to clipboard! 📋", 2500);
+        });
+    }
+
     copyExecutiveBriefing() {
         if (!this.currentAnalysis) {
             this.showToast("No active contract loaded to summarize.", 2000);
@@ -1228,6 +1345,21 @@ class ContractApp {
                 if (e.key.toLowerCase() === 'v') {
                     e.preventDefault();
                     this.toggleViewDensity();
+                    return;
+                }
+
+                if (e.key.toLowerCase() === 'n') {
+                    e.preventDefault();
+                    if (this.currentSelectedSegment) {
+                        const drawer = document.getElementById('clauseDrawer');
+                        if (drawer) drawer.style.display = 'flex';
+                        const noteInput = document.getElementById('drawerNoteText');
+                        if (noteInput) {
+                            noteInput.focus();
+                        }
+                    } else {
+                        this.showToast("Select a clause first to add an analyst note (N)", 2000);
+                    }
                     return;
                 }
 

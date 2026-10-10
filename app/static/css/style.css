@@ -920,6 +920,20 @@ body {
     border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
+.clause-note-badge {
+    font-size: 10px;
+    font-weight: 700;
+    background: rgba(245, 158, 11, 0.15);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    letter-spacing: 0.02em;
+}
+
 .clause-bookmark-btn {
     background: transparent;
     border: none;
@@ -1052,6 +1066,12 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 12px;
+}
+
+.brief-btn-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .copy-brief-btn {
@@ -1715,6 +1735,88 @@ kbd {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 6px;
+}
+
+.drawer-subheading-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.note-status-tag {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #10B981;
+    background: rgba(16, 185, 129, 0.15);
+    padding: 1px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+.drawer-note-container {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 8px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.drawer-note-container:focus-within {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.18);
+}
+
+.drawer-note-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.drawer-note-input::placeholder {
+    color: var(--text-muted);
+}
+
+.drawer-note-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-note-action {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-note-action:hover {
+    background: var(--border-hover);
+    color: var(--text-primary);
+}
+
+.btn-note-action-accent {
+    color: var(--accent-blue);
+    border-color: rgba(56, 189, 248, 0.3);
+}
+
+.btn-note-action-accent:hover {
+    background: rgba(56, 189, 248, 0.15);
 }
 
 .cuad-info-box, .risk-info-box, .redline-box, .clause-raw-text {

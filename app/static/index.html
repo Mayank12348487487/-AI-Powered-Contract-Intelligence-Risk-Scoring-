@@ -233,6 +233,7 @@
                         <select id="highlightFilter" class="custom-select-small" onchange="window.app.filterHighlights(this.value)">
                             <option value="ALL">Show All Highlights</option>
                             <option value="BOOKMARKED">⭐ Bookmarked Only</option>
+                            <option value="ANNOTATED">📝 With Analyst Notes</option>
                             <option value="HIGH_RISK">⚠️ Flagged Risk Only</option>
                             <option value="liability">Liability & Indemnity</option>
                             <option value="non_compete">Non-Compete & Restrictive</option>
@@ -279,13 +280,18 @@
                             <div class="tab-title">High-Risk Language & Mitigation Checklist</div>
                             <div class="tab-subtitle">Identified compliance vulnerabilities with suggested standard fallback language.</div>
                         </div>
-                        <button id="copyBriefBtn" class="btn btn-secondary copy-brief-btn" onclick="window.app.copyExecutiveBriefing()" title="Copy Markdown executive audit summary to clipboard">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                            </svg>
-                            Copy Summary Brief
-                        </button>
+                        <div class="brief-btn-group">
+                            <button id="copyNotesBtn" class="btn btn-secondary copy-brief-btn" onclick="window.app.copyAuditNotes()" title="Copy all marked clauses and custom analyst notes">
+                                <span>📝</span> Copy Notes & Memos
+                            </button>
+                            <button id="copyBriefBtn" class="btn btn-secondary copy-brief-btn" onclick="window.app.copyExecutiveBriefing()" title="Copy Markdown executive audit summary to clipboard">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                Copy Summary Brief
+                            </button>
+                        </div>
                     </div>
                     <div id="anomaliesList" class="anomalies-list-container">
                         <div class="empty-tab-hint">Load a contract to view high-risk triggers and negotiation redlines.</div>
@@ -464,6 +470,10 @@
                     <div class="shortcut-keys"><kbd>V</kbd></div>
                 </div>
                 <div class="shortcut-row">
+                    <div class="shortcut-desc">Focus Clause Analyst Note</div>
+                    <div class="shortcut-keys"><kbd>N</kbd></div>
+                </div>
+                <div class="shortcut-row">
                     <div class="shortcut-desc">Toggle Dark / Light Mode</div>
                     <div class="shortcut-keys"><kbd>T</kbd></div>
                 </div>
@@ -517,6 +527,19 @@
             <div class="drawer-section">
                 <div class="drawer-subheading">Recommended Standard Redline</div>
                 <div id="drawerRedlineBox" class="redline-box">--</div>
+            </div>
+            <div class="drawer-section">
+                <div class="drawer-subheading-flex">
+                    <span class="drawer-subheading">📝 Analyst Audit Notes & Memo</span>
+                    <span id="noteSaveStatus" class="note-status-tag" style="display: none;">Saved</span>
+                </div>
+                <div class="drawer-note-container">
+                    <textarea id="drawerNoteText" class="drawer-note-input" placeholder="Add custom negotiation notes, internal counsel comments, or redline directives (N)..." rows="3" oninput="window.app.saveCurrentClauseNote(this.value)"></textarea>
+                    <div class="drawer-note-actions">
+                        <button class="btn-note-action" onclick="window.app.clearCurrentClauseNote()">Clear Note</button>
+                        <button class="btn-note-action btn-note-action-accent" onclick="window.app.copyCurrentClauseNote()">Copy Note</button>
+                    </div>
+                </div>
             </div>
             <div class="drawer-section">
                 <div class="drawer-subheading">Clause Full Text</div>
