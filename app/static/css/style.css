@@ -450,13 +450,111 @@ body {
     max-width: 200px;
 }
 
+/* Risk Severity Distribution Bar */
+.risk-dist-wrap {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.risk-dist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.risk-dist-title {
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.risk-dist-counts {
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+}
+
+.risk-dist-bar {
+    height: 6px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    display: flex;
+    overflow: hidden;
+    width: 100%;
+}
+
+.dist-segment {
+    height: 100%;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dist-crit { background: #EF4444; }
+.dist-high { background: #F97316; }
+.dist-med { background: #F59E0B; }
+.dist-safe { background: #10B981; }
+
 /* Risk Pillars */
 .risk-pillars-container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 7px;
     border-left: 1px solid var(--border-color);
     padding-left: 20px;
+}
+
+.risk-pillars-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.pillars-title {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+}
+
+.reset-pillars-btn {
+    background: transparent;
+    border: none;
+    color: var(--accent-blue);
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    padding: 1px 5px;
+    border-radius: 3px;
+    transition: all 0.15s ease;
+}
+
+.reset-pillars-btn:hover {
+    background: rgba(56, 189, 248, 0.15);
+}
+
+.clickable-pillar {
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.clickable-pillar:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
+    transform: translateX(2px);
+}
+
+.clickable-pillar.active {
+    background: rgba(56, 189, 248, 0.12);
+    border-color: rgba(56, 189, 248, 0.4);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
 }
 
 .pillar-row {

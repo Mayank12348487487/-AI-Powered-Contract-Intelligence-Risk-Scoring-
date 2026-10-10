@@ -17,6 +17,7 @@ class ContractApp {
         this.bookmarkedClauses = new Set();
         this.fontSizeLevel = 1; // 0: sm, 1: md, 2: lg, 3: xl
         this.isCompactView = false;
+        this.activePillar = null;
         
         this.init();
     }
@@ -62,6 +63,15 @@ class ContractApp {
         this.currentAnalysis = analysisData;
         this.currentDocId = analysisData.doc_id;
         this.bookmarkedClauses.clear();
+        this.activePillar = null;
+
+        // Reset pillar rows active classes
+        ['pillarRow1', 'pillarRow2', 'pillarRow3', 'pillarRow4'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('active');
+        });
+        const resetBtn = document.getElementById('resetPillarsBtn');
+        if (resetBtn) resetBtn.style.display = 'none';
 
         // Reset search input
         const searchInput = document.getElementById('clauseSearchInput');
@@ -151,6 +161,30 @@ class ContractApp {
         this.updatePillarBar('pillar2Score', 'pillar2Bar', pillars.unfavorable_terms_and_anomalies?.score || 0, 35, '#EF4444');
         this.updatePillarBar('pillar3Score', 'pillar3Bar', pillars.operational_and_lockin_risk?.score || 0, 20, '#F97316');
         this.updatePillarBar('pillar4Score', 'pillar4Bar', pillars.ambiguity_risk?.score || 0, 10, '#38BDF8');
+
+        // Severity Breakdown Distribution Bar
+        const anomalies = risk.anomalies || [];
+        const critCount = anomalies.filter(a => a.severity === 'CRITICAL').length;
+        const highCount = anomalies.filter(a => a.severity === 'HIGH').length;
+        const medCount = anomalies.filter(a => a.severity === 'MEDIUM').length;
+        const totalSegs = data.total_segments || 10;
+        const safeCount = Math.max(0, totalSegs - anomalies.length);
+        const totalItems = (anomalies.length + safeCount) || 1;
+
+        const distWrap = document.getElementById('riskDistributionWrap');
+        const distSummary = document.getElementById('riskDistSummary');
+        const distCritBar = document.getElementById('distCritBar');
+        const distHighBar = document.getElementById('distHighBar');
+        const distMedBar = document.getElementById('distMedBar');
+        const distSafeBar = document.getElementById('distSafeBar');
+
+        if (distWrap) distWrap.style.display = 'flex';
+        if (distSummary) distSummary.textContent = `${critCount} Crit • ${highCount} High • ${medCount} Med • ${safeCount} Safe`;
+
+        if (distCritBar) distCritBar.style.width = `${(critCount / totalItems) * 100}%`;
+        if (distHighBar) distHighBar.style.width = `${(highCount / totalItems) * 100}%`;
+        if (distMedBar) distMedBar.style.width = `${(medCount / totalItems) * 100}%`;
+        if (distSafeBar) distSafeBar.style.width = `${(safeCount / totalItems) * 100}%`;
     }
 
     updatePillarBar(scoreElemId, barElemId, value, maxVal, color) {
@@ -161,6 +195,77 @@ class ContractApp {
             const pct = Math.min(100, (value / maxVal) * 100);
             barElem.style.width = `${pct}%`;
             barElem.style.backgroundColor = color;
+        }
+    }
+
+    filterByPillar(pillarKey) {
+        this.activePillar = pillarKey;
+
+        // Update active class on pillar rows
+        const rows = [
+            { id: 'pillarRow1', key: 'missing_protections' },
+            { id: 'pillarRow2', key: 'unfavorable_terms' },
+            { id: 'pillarRow3', key: 'operational_lockin' },
+            { id: 'pillarRow4', key: 'ambiguity' }
+        ];
+
+        rows.forEach(r => {
+            const el = document.getElementById(r.id);
+            if (el) {
+                if (r.key === pillarKey) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            }
+        });
+
+        const resetBtn = document.getElementById('resetPillarsBtn');
+        if (resetBtn) resetBtn.style.display = pillarKey ? 'inline-block' : 'none';
+
+        if (!pillarKey) {
+            // Reset filters
+            const filterSelect = document.getElementById('highlightFilter');
+            if (filterSelect) filterSelect.value = 'ALL';
+            this.activeFilter = 'ALL';
+            this.clearSearch();
+            this.showToast("Risk pillar filter reset ✓", 1500);
+            return;
+        }
+
+        if (pillarKey === 'missing_protections') {
+            this.switchTab('riskTab');
+            const riskTabBtn = document.querySelectorAll('.tabs-nav .tab-btn')[0];
+            if (riskTabBtn) {
+                document.querySelectorAll('.tabs-nav .tab-btn').forEach(b => b.classList.remove('active'));
+                riskTabBtn.classList.add('active');
+            }
+            this.showToast("Filtered to Missing Protections & Essential Covenants 🛡️", 2000);
+        } else if (pillarKey === 'unfavorable_terms') {
+            const filterSelect = document.getElementById('highlightFilter');
+            if (filterSelect) filterSelect.value = 'HIGH_RISK';
+            this.activeFilter = 'HIGH_RISK';
+            this.applyClauseFilters();
+            this.switchTab('riskTab');
+            const riskTabBtn = document.querySelectorAll('.tabs-nav .tab-btn')[0];
+            if (riskTabBtn) {
+                document.querySelectorAll('.tabs-nav .tab-btn').forEach(b => b.classList.remove('active'));
+                riskTabBtn.classList.add('active');
+            }
+            this.showToast("Filtered to Unfavorable Clauses & Risk Redlines ⚠️", 2000);
+        } else if (pillarKey === 'operational_lockin') {
+            const filterSelect = document.getElementById('highlightFilter');
+            if (filterSelect) filterSelect.value = 'termination';
+            this.activeFilter = 'termination';
+            this.applyClauseFilters();
+            this.showToast("Filtered to Operational & Lock-in Risk Clauses 🔒", 2000);
+        } else if (pillarKey === 'ambiguity') {
+            const searchInput = document.getElementById('clauseSearchInput');
+            if (searchInput) {
+                searchInput.value = 'sole discretion';
+                this.searchClauses('sole discretion');
+            }
+            this.showToast("Filtered to Ambiguous & Discretionary Clauses 📝", 2000);
         }
     }
 

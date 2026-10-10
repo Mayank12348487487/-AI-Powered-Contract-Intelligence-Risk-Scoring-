@@ -101,6 +101,18 @@
                     </div>
                     <div class="risk-title">Composite Legal Risk Index</div>
                     <div id="riskTierDesc" class="risk-subtext">Upload a contract or select a CUAD sample above to start inference.</div>
+                    <div id="riskDistributionWrap" class="risk-dist-wrap" style="display: none;">
+                        <div class="risk-dist-header">
+                            <span class="risk-dist-title">Severity Breakdown</span>
+                            <span id="riskDistSummary" class="risk-dist-counts">0 Crit • 0 High • 0 Med</span>
+                        </div>
+                        <div class="risk-dist-bar">
+                            <div id="distCritBar" class="dist-segment dist-crit" style="width: 0%" title="Critical Risk"></div>
+                            <div id="distHighBar" class="dist-segment dist-high" style="width: 0%" title="High Risk"></div>
+                            <div id="distMedBar" class="dist-segment dist-med" style="width: 0%" title="Medium Risk"></div>
+                            <div id="distSafeBar" class="dist-segment dist-safe" style="width: 100%" title="Safe / Standard"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -138,36 +150,40 @@
 
             <!-- Risk Pillars Breakdown -->
             <div class="risk-pillars-container">
-                <div class="pillar-row">
+                <div class="risk-pillars-header">
+                    <span class="pillars-title">RISK DRIVERS (CLICK TO FILTER)</span>
+                    <button id="resetPillarsBtn" class="reset-pillars-btn" onclick="window.app.filterByPillar(null)" style="display: none;" title="Reset pillar filter">Reset</button>
+                </div>
+                <div id="pillarRow1" class="pillar-row clickable-pillar" onclick="window.app.filterByPillar('missing_protections')" title="Filter Missing Protections covenants">
                     <div class="pillar-info">
-                        <span>Missing Protections</span>
+                        <span>🛡️ Missing Protections</span>
                         <span id="pillar1Score">0 / 35</span>
                     </div>
                     <div class="progress-bar-track">
                         <div id="pillar1Bar" class="progress-bar-fill" style="width: 0%"></div>
                     </div>
                 </div>
-                <div class="pillar-row">
+                <div id="pillarRow2" class="pillar-row clickable-pillar" onclick="window.app.filterByPillar('unfavorable_terms')" title="Filter Unfavorable Terms & Risk Anomalies">
                     <div class="pillar-info">
-                        <span>Unfavorable Terms & Anomalies</span>
+                        <span>⚠️ Unfavorable Terms & Anomalies</span>
                         <span id="pillar2Score">0 / 35</span>
                     </div>
                     <div class="progress-bar-track">
                         <div id="pillar2Bar" class="progress-bar-fill" style="width: 0%"></div>
                     </div>
                 </div>
-                <div class="pillar-row">
+                <div id="pillarRow3" class="pillar-row clickable-pillar" onclick="window.app.filterByPillar('operational_lockin')" title="Filter Operational & Lock-in Risk">
                     <div class="pillar-info">
-                        <span>Operational & Lock-in Risk</span>
+                        <span>🔒 Operational & Lock-in Risk</span>
                         <span id="pillar3Score">0 / 20</span>
                     </div>
                     <div class="progress-bar-track">
                         <div id="pillar3Bar" class="progress-bar-fill" style="width: 0%"></div>
                     </div>
                 </div>
-                <div class="pillar-row">
+                <div id="pillarRow4" class="pillar-row clickable-pillar" onclick="window.app.filterByPillar('ambiguity')" title="Filter Ambiguity & Boilerplate Drift">
                     <div class="pillar-info">
-                        <span>Ambiguity & Boilerplate Drift</span>
+                        <span>📝 Ambiguity & Boilerplate Drift</span>
                         <span id="pillar4Score">0 / 10</span>
                     </div>
                     <div class="progress-bar-track">
