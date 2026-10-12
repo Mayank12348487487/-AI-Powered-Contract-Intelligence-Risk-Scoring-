@@ -19,6 +19,8 @@ class ContractApp {
         this.fontSizeLevel = 1; // 0: sm, 1: md, 2: lg, 3: xl
         this.isCompactView = false;
         this.activePillar = null;
+        this.flaggedSegmentIds = [];
+        this.currentRiskIndex = -1;
         
         this.init();
     }
@@ -26,6 +28,20 @@ class ContractApp {
     async init() {
         console.log("Initializing Contract Intelligence Studio...");
         this.setupKeyboardShortcuts();
+        
+        // Setup document scroll progress listener
+        const docContainer = document.getElementById('documentContainer');
+        if (docContainer) {
+            docContainer.addEventListener('scroll', () => {
+                const totalScroll = docContainer.scrollHeight - docContainer.clientHeight;
+                const pct = totalScroll > 0 ? (docContainer.scrollTop / totalScroll) * 100 : 0;
+                const progressBar = document.getElementById('docProgressBar');
+                if (progressBar) {
+                    progressBar.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+                }
+            });
+        }
+
         await this.fetchCuadSchema();
         // Automatically load default sample SaaS agreement for instant showcase
         await this.loadSample('saas_master_agreement');
@@ -299,6 +315,26 @@ class ContractApp {
 
         if (wordCountElem) wordCountElem.textContent = `${totalWords.toLocaleString()} Words`;
         if (readTimeElem) readTimeElem.textContent = `~${readMins}m Read`;
+
+        // Extract flagged risk clause IDs for quick navigation
+        this.flaggedSegmentIds = (data.risk_analysis?.anomalies || [])
+            .map(a => a.segment_id)
+            .filter(id => id !== null && id !== undefined);
+        this.currentRiskIndex = -1;
+
+        const riskNav = document.getElementById('riskNavGroup');
+        const riskCounter = document.getElementById('riskNavCounter');
+        if (riskNav) {
+            if (this.flaggedSegmentIds.length > 0) {
+                riskNav.style.display = 'inline-flex';
+                if (riskCounter) riskCounter.textContent = `0/${this.flaggedSegmentIds.length} Risks`;
+            } else {
+                riskNav.style.display = 'none';
+            }
+        }
+
+        const progressBar = document.getElementById('docProgressBar');
+        if (progressBar) progressBar.style.width = '0%';
 
         if (!container) return;
 
@@ -1249,6 +1285,30 @@ class ContractApp {
         }
     }
 
+    navigateRisk(direction = 1) {
+        if (!this.flaggedSegmentIds || this.flaggedSegmentIds.length === 0) {
+            this.showToast("No flagged risk clauses found in this document.", 2000);
+            return;
+        }
+
+        if (this.currentRiskIndex === -1 && direction > 0) {
+            this.currentRiskIndex = 0;
+        } else if (this.currentRiskIndex === -1 && direction < 0) {
+            this.currentRiskIndex = this.flaggedSegmentIds.length - 1;
+        } else {
+            this.currentRiskIndex = (this.currentRiskIndex + direction + this.flaggedSegmentIds.length) % this.flaggedSegmentIds.length;
+        }
+
+        const targetSegId = this.flaggedSegmentIds[this.currentRiskIndex];
+        const counter = document.getElementById('riskNavCounter');
+        if (counter) {
+            counter.textContent = `${this.currentRiskIndex + 1}/${this.flaggedSegmentIds.length} Risks`;
+        }
+
+        this.jumpToClause(targetSegId);
+        this.showToast(`Risk Clause #${targetSegId} (${this.currentRiskIndex + 1} of ${this.flaggedSegmentIds.length})`, 1600);
+    }
+
     openShortcutsModal() {
         const modal = document.getElementById('shortcutsModal');
         if (modal) modal.style.display = 'flex';
@@ -1366,6 +1426,12 @@ class ContractApp {
                 if (e.key.toLowerCase() === 'u') {
                     e.preventDefault();
                     this.triggerUploadModal();
+                    return;
+                }
+
+                if (e.key.toLowerCase() === 'r') {
+                    e.preventDefault();
+                    this.navigateRisk(e.shiftKey ? -1 : 1);
                     return;
                 }
             }

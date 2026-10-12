@@ -211,6 +211,12 @@
                         </div>
                     </div>
                     <div class="panel-actions">
+                        <!-- Next/Previous Flagged Risk Navigator -->
+                        <div id="riskNavGroup" class="risk-nav-group" style="display: none;" title="Flagged Risk Navigator (R / Shift+R)">
+                            <button id="prevRiskBtn" class="risk-nav-btn" onclick="window.app.navigateRisk(-1)" title="Previous Flagged Risk (Shift+R)">▲</button>
+                            <span id="riskNavCounter" class="risk-nav-counter">0/0 Risks</span>
+                            <button id="nextRiskBtn" class="risk-nav-btn" onclick="window.app.navigateRisk(1)" title="Next Flagged Risk (R)">▼ Next</button>
+                        </div>
                         <div class="search-input-wrapper">
                             <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="11" cy="11" r="8"></circle>
@@ -241,6 +247,11 @@
                             <option value="ip">Intellectual Property</option>
                         </select>
                     </div>
+                </div>
+
+                <!-- Document Reading Progress Bar -->
+                <div class="doc-progress-container" title="Document reading & scroll progress">
+                    <div id="docProgressBar" class="doc-progress-bar" style="width: 0%;"></div>
                 </div>
 
                 <div id="documentContainer" class="document-content-scrollable font-size-md">
@@ -472,6 +483,10 @@
                 <div class="shortcut-row">
                     <div class="shortcut-desc">Focus Clause Analyst Note</div>
                     <div class="shortcut-keys"><kbd>N</kbd></div>
+                </div>
+                <div class="shortcut-row">
+                    <div class="shortcut-desc">Jump to Next / Prev Flagged Risk</div>
+                    <div class="shortcut-keys"><kbd>R</kbd> <span class="shortcut-or">/</span> <kbd>Shift</kbd>+<kbd>R</kbd></div>
                 </div>
                 <div class="shortcut-row">
                     <div class="shortcut-desc">Toggle Dark / Light Mode</div>
