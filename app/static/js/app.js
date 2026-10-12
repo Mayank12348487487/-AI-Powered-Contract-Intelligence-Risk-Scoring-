@@ -42,6 +42,18 @@ class ContractApp {
             });
         }
 
+        // Setup search input Escape listener
+        const searchInput = document.getElementById('clauseSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    this.clearSearch();
+                    searchInput.blur();
+                }
+            });
+        }
+
         await this.fetchCuadSchema();
         // Automatically load default sample SaaS agreement for instant showcase
         await this.loadSample('saas_master_agreement');
@@ -400,6 +412,13 @@ class ContractApp {
         return escaped;
     }
 
+    highlightSearchMatches(html, query) {
+        if (!query) return html;
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(?![^<]*>)(${escaped})`, 'gi');
+        return html.replace(regex, '<mark class="search-highlight">$1</mark>');
+    }
+
     selectClause(seg) {
         this.currentSelectedSegment = seg;
         // Remove prior active classes
@@ -683,11 +702,13 @@ class ContractApp {
     clearSearch() {
         const searchInput = document.getElementById('clauseSearchInput');
         const clearBtn = document.getElementById('clearSearchBtn');
+        const matchBadge = document.getElementById('searchMatchCount');
         if (searchInput) {
             searchInput.value = '';
             searchInput.focus();
         }
         if (clearBtn) clearBtn.style.display = 'none';
+        if (matchBadge) matchBadge.style.display = 'none';
         this.searchQuery = '';
         this.applyClauseFilters();
     }
@@ -702,17 +723,19 @@ class ContractApp {
         let visibleCount = 0;
 
         cards.forEach(card => {
+            const segId = parseInt(card.dataset.segmentId, 10);
+            const seg = this.currentAnalysis?.segments?.find(s => s.id === segId);
             const catId = (card.dataset.categoryId || '').toLowerCase();
             const hasRisk = card.dataset.hasRisk === 'true';
-            const cardText = (card.textContent || '').toLowerCase();
+            const cardText = (seg?.text || card.textContent || '').toLowerCase();
 
             let matchesCategory = false;
             if (this.activeFilter === 'ALL') {
                 matchesCategory = true;
             } else if (this.activeFilter === 'BOOKMARKED') {
-                matchesCategory = this.bookmarkedClauses.has(parseInt(card.dataset.segmentId, 10));
+                matchesCategory = this.bookmarkedClauses.has(segId);
             } else if (this.activeFilter === 'ANNOTATED') {
-                matchesCategory = !!(this.clauseNotes.get(parseInt(card.dataset.segmentId, 10))?.trim());
+                matchesCategory = !!(this.clauseNotes.get(segId)?.trim());
             } else if (this.activeFilter === 'HIGH_RISK') {
                 matchesCategory = hasRisk;
             } else if (this.activeFilter === 'liability') {
@@ -732,10 +755,31 @@ class ContractApp {
             if (matchesCategory && matchesSearch) {
                 card.style.display = 'block';
                 visibleCount++;
+
+                // Highlight search matches in clause text dynamically
+                const textEl = card.querySelector('.clause-text');
+                if (seg && textEl) {
+                    let highlighted = this.highlightEntitiesInText(seg.text);
+                    if (this.searchQuery) {
+                        highlighted = this.highlightSearchMatches(highlighted, this.searchQuery);
+                    }
+                    textEl.innerHTML = highlighted;
+                }
             } else {
                 card.style.display = 'none';
             }
         });
+
+        // Update match count badge inside search wrapper
+        const matchBadge = document.getElementById('searchMatchCount');
+        if (matchBadge) {
+            if (this.searchQuery) {
+                matchBadge.textContent = `${visibleCount} found`;
+                matchBadge.style.display = 'inline-block';
+            } else {
+                matchBadge.style.display = 'none';
+            }
+        }
 
         const countBadge = document.getElementById('docSegmentCount');
         if (countBadge && this.currentAnalysis) {

@@ -728,9 +728,33 @@ body {
 }
 
 .custom-search-input:focus {
-    width: 185px;
+    width: 215px;
     border-color: var(--accent-blue);
     box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.search-match-count {
+    position: absolute;
+    right: 22px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent-blue);
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    padding: 1px 6px;
+    border-radius: var(--radius-full);
+    pointer-events: none;
+    white-space: nowrap;
+    user-select: none;
+}
+
+mark.search-highlight {
+    background: rgba(245, 158, 11, 0.35);
+    color: #FDE047;
+    font-weight: 700;
+    border-radius: 2px;
+    padding: 0 2px;
+    box-shadow: 0 0 6px rgba(245, 158, 11, 0.3);
 }
 
 .search-clear-btn {
