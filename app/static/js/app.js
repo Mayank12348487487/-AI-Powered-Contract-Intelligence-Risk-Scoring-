@@ -524,6 +524,22 @@ class ContractApp {
         const risk = data.risk_analysis || {};
         const anomalies = risk.anomalies || [];
         const missing = risk.missing_clauses || [];
+        const redlineItems = anomalies.filter(a => a.recommended_redline && a.recommended_redline.trim());
+
+        const redlinesBadge = document.getElementById('redlinesCountBadge');
+        if (redlinesBadge) {
+            if (redlineItems.length > 0) {
+                redlinesBadge.textContent = `${redlineItems.length} Redline Proposals`;
+                redlinesBadge.style.display = 'inline-flex';
+            } else {
+                redlinesBadge.style.display = 'none';
+            }
+        }
+
+        const copyAllBtn = document.getElementById('copyAllRedlinesBtn');
+        if (copyAllBtn) {
+            copyAllBtn.disabled = redlineItems.length === 0;
+        }
 
         if (anomalies.length === 0 && missing.length === 0) {
             container.innerHTML = `
@@ -1291,6 +1307,46 @@ class ContractApp {
 
         navigator.clipboard.writeText(md).then(() => {
             this.showToast("Executive audit briefing copied to clipboard! 📋", 2500);
+        });
+    }
+
+    copyAllRedlines() {
+        const anomalies = this.currentAnalysis?.risk_analysis?.anomalies || [];
+        const redlineItems = anomalies.filter(a => a.recommended_redline && a.recommended_redline.trim());
+
+        if (redlineItems.length === 0) {
+            this.showToast("No suggested redline provisions found for this document.", 2500);
+            return;
+        }
+
+        const docTitle = this.currentAnalysis?.filename || 'Contract Agreement';
+        const score = this.currentAnalysis?.risk_analysis?.composite_score ?? '--';
+        const tier = this.currentAnalysis?.risk_analysis?.risk_tier || 'Standard';
+
+        let md = `# CONTRACT REDLINE SCHEDULE & RECOMMENDED AMENDMENTS\n`;
+        md += `Agreement: ${docTitle}\n`;
+        md += `Composite Risk Index: ${score} / 100 (${tier})\n`;
+        md += `Total Redline Proposals: ${redlineItems.length}\n`;
+        md += `Date Generated: ${new Date().toLocaleDateString()}\n\n`;
+        md += `====================================================\n\n`;
+
+        redlineItems.forEach((item, idx) => {
+            md += `### Redline Item ${idx + 1}: ${item.category} (${item.severity} Risk)\n`;
+            if (item.segment_id) {
+                md += `**Target Section**: Clause #${item.segment_id}\n`;
+            }
+            md += `**Compliance Risk Rationale**: ${item.rationale}\n`;
+            if (item.flagged_text) {
+                md += `**Original Problematic Language**:\n> "${item.flagged_text}"\n\n`;
+            }
+            md += `**Proposed Standard Redline Substitute**:\n> "${item.recommended_redline}"\n\n`;
+            md += `----------------------------------------------------\n\n`;
+        });
+
+        navigator.clipboard.writeText(md).then(() => {
+            this.showToast(`Redline schedule (${redlineItems.length} items) copied to clipboard! 📋`, 2500);
+        }).catch(() => {
+            this.showToast("Failed to copy redlines to clipboard", 2000);
         });
     }
 

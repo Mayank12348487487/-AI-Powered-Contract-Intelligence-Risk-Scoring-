@@ -289,10 +289,16 @@
                 <div id="riskTab" class="tab-pane active">
                     <div class="tab-inner-header tab-inner-header-flex">
                         <div>
-                            <div class="tab-title">High-Risk Language & Mitigation Checklist</div>
+                            <div class="tab-title-row">
+                                <span class="tab-title">High-Risk Language & Mitigation Checklist</span>
+                                <span id="redlinesCountBadge" class="count-badge count-badge-subtle" style="display: none;">0 Redlines</span>
+                            </div>
                             <div class="tab-subtitle">Identified compliance vulnerabilities with suggested standard fallback language.</div>
                         </div>
                         <div class="brief-btn-group">
+                            <button id="copyAllRedlinesBtn" class="btn btn-secondary copy-brief-btn copy-redlines-btn" onclick="window.app.copyAllRedlines()" title="Copy all suggested contract redlines in standard markup format">
+                                <span>⚖️</span> Copy Redline Schedule
+                            </button>
                             <button id="copyNotesBtn" class="btn btn-secondary copy-brief-btn" onclick="window.app.copyAuditNotes()" title="Copy all marked clauses and custom analyst notes">
                                 <span>📝</span> Copy Notes & Memos
                             </button>

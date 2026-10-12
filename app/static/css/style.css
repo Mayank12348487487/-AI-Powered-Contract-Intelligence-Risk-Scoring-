@@ -1166,6 +1166,24 @@ mark.search-highlight {
     color: var(--accent-blue);
 }
 
+.copy-redlines-btn {
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #10B981;
+}
+
+.copy-redlines-btn:hover:not(:disabled) {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: #10B981;
+    color: #34D399;
+}
+
+.tab-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+}
+
 .tab-title {
     font-size: 15px;
     font-weight: 700;
