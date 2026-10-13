@@ -162,4 +162,20 @@ def test_additional_high_risk_anomalies():
     assert "Harsh Liquidated Damages / Penalties" in categories_flagged
     assert risk["composite_score"] >= 60
 
+def test_consequential_damages_and_non_disparagement_anomalies():
+    contract_text = """COMMERCIAL SERVICES AGREEMENT
+1. Customer waives all rights under consequential damages waiver and liability shall include all indirect, special, punitive or consequential damages.
+2. Customer covenants that it shall not make or publish any negative or disparaging statements regarding Provider in perpetuity.
+"""
+    parsed = DocumentParser.parse_file("services.txt", contract_text.encode("utf-8"))
+    entities = ner_engine.extract_entities(contract_text)
+    enriched = clause_classifier.classify_document_segments(parsed["segments"])
+    risk = risk_engine.evaluate_contract_risk(contract_text, enriched, entities)
+
+    categories_flagged = [a["category"] for a in risk["anomalies"]]
+    assert "Consequential Damages Exposure" in categories_flagged
+    assert "Perpetual Non-Disparagement Covenant" in categories_flagged
+    assert len(risk["anomalies"]) >= 2
+
+
 

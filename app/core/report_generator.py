@@ -60,6 +60,12 @@ class ReportGenerator:
             for r in recs
         ])
 
+        pillars = risk.get("pillar_breakdown", {})
+        p1 = pillars.get("missing_protections", {}).get("score", 0)
+        p2 = pillars.get("unfavorable_terms_and_anomalies", {}).get("score", 0)
+        p3 = pillars.get("operational_and_lockin_risk", {}).get("score", 0)
+        p4 = pillars.get("ambiguity_risk", {}).get("score", 0)
+
         html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -114,6 +120,28 @@ class ReportGenerator:
     <div class="section">
         <div class="section-title">Executive Summary</div>
         <p style="background: #F1F5F9; padding: 15px; border-radius: 8px; font-size: 14px;">{risk.get('executive_summary', 'Analysis completed successfully.')}</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Risk Assessment Pillars</div>
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-val" style="color: #F59E0B;">{p1}/35</div>
+                <div class="kpi-label">Missing Protections</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-val" style="color: #EF4444;">{p2}/35</div>
+                <div class="kpi-label">Unfavorable Terms</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-val" style="color: #F97316;">{p3}/20</div>
+                <div class="kpi-label">Operational &amp; Lock-in</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-val" style="color: #0284C7;">{p4}/10</div>
+                <div class="kpi-label">Ambiguity Drift</div>
+            </div>
+        </div>
     </div>
 
     <div class="section">

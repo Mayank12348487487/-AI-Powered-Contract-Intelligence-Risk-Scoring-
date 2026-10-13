@@ -117,6 +117,22 @@ ANOMALY_PATTERNS = [
         "points": 12,
         "rationale": "Imposes open-ended restrictive covenants surviving contract termination indefinitely without temporal bounds.",
         "recommended_redline": "Post-termination survival obligations shall be strictly limited to a defined duration of two (2) to three (3) years."
+    },
+    {
+        "pattern": re.compile(r'(?:waives?|not\s+subject\s+to).*(?:consequential|indirect|punitive|special)\s+damages?\s+(?:waiver|disclaimer|exclusion)|shall\s+include\s+(?:all\s+)?indirect,\s+special,\s+punitive\s+or\s+consequential\s+damages', re.IGNORECASE),
+        "category": "Consequential Damages Exposure",
+        "severity": "HIGH",
+        "points": 15,
+        "rationale": "Exposes contracting party to speculative, indirect, or punitive damages without standard commercial exclusions.",
+        "recommended_redline": "Neither Party shall be liable to the other Party for any indirect, incidental, special, punitive, or exemplary damages."
+    },
+    {
+        "pattern": re.compile(r'non-disparagement.*(?:in\s+perpetuity|indefinitely|forever)|shall\s+not.*(?:make|publish).*(?:negative|disparaging).*(?:in\s+perpetuity|forever)', re.IGNORECASE),
+        "category": "Perpetual Non-Disparagement Covenant",
+        "severity": "MEDIUM",
+        "points": 8,
+        "rationale": "Imposes perpetual gag or non-disparagement covenants without temporal limits or standard safe harbor carveouts.",
+        "recommended_redline": "Non-disparagement obligations shall be reciprocal, expire within two (2) years of termination, and exclude truthful regulatory or legal testimony."
     }
 ]
 

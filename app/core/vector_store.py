@@ -1,5 +1,7 @@
 import logging
+import re
 from typing import List, Dict, Any, Optional, Tuple
+from collections import OrderedDict
 
 from app.core.vector_math import FastTFIDFVectorizer, SparseInvertedIndex, sparse_cosine_similarity
 from app.core.registry import document_registry
@@ -9,7 +11,7 @@ logger = logging.getLogger(__name__)
 class ContractVectorStore:
     def __init__(self):
         self.documents: Dict[str, Dict[str, Any]] = {}
-        self._query_cache: Dict[Tuple[str, str, int], List[Dict[str, Any]]] = {}
+        self._query_cache: OrderedDict[Tuple[str, str, int], List[Dict[str, Any]]] = OrderedDict()
         # Register for automatic eviction when registry evicts documents
         document_registry.register_eviction_callback(self.remove_document)
 
@@ -66,6 +68,7 @@ class ContractVectorStore:
 
         cache_key = (doc_id, clean_query.lower(), top_k)
         if cache_key in self._query_cache:
+            self._query_cache.move_to_end(cache_key)
             return self._query_cache[cache_key]
 
         vectorizer = doc_data["vectorizer"]
@@ -91,9 +94,9 @@ class ContractVectorStore:
                 })
 
             # Bounded LRU cache size (max 256 entries)
-            if len(self._query_cache) > 256:
-                self._query_cache.pop(next(iter(self._query_cache)), None)
             self._query_cache[cache_key] = results
+            if len(self._query_cache) > 256:
+                self._query_cache.popitem(last=False)
             return results
         except Exception as e:
             logger.error("Semantic search failed: %s", str(e))
@@ -110,6 +113,8 @@ class ContractVectorStore:
         Legal Q&A Assistant: synthesizes grounded legal answer for a contract query.
         """
         search_results = self.semantic_search(doc_id, query, top_k=3)
+        doc_data = self.documents.get(doc_id)
+        doc_segments = doc_data.get("segments", []) if doc_data else []
         
         q_lower = query.lower()
         answer = ""
@@ -141,7 +146,7 @@ class ContractVectorStore:
             else:
                 answer = "The contract does not specify a distinct effective date."
 
-        elif "expiration" in q_lower or "term" in q_lower or "how long" in q_lower or "duration" in q_lower:
+        elif ("terminat" not in q_lower) and ("expiration" in q_lower or "how long" in q_lower or "duration" in q_lower or bool(re.search(r'\b(?:terms?|contract\s+period)\b', q_lower))):
             if entities and entities.get("expiration_date"):
                 answer = f"The contract expires on **{entities['expiration_date']['value']}**."
             elif search_results:
@@ -235,6 +240,55 @@ class ContractVectorStore:
                 if any(k in r_text_lower for k in ("pay", "fee", "invoice", "net 30", "due date", "price")):
                     relevant_clause = r
                     answer = f"Payment & Pricing Terms ({r['heading']}): \"{r['text'][:300]}...\""
+                    break
+
+        elif "terminat" in q_lower or "cancel" in q_lower or "exit" in q_lower or "breach" in q_lower:
+            candidates = search_results + doc_segments
+            for r in candidates:
+                r_text_lower = r["text"].lower()
+                r_head_lower = r.get("heading", "").lower()
+                if any(k in r_text_lower or k in r_head_lower for k in ("terminat", "cancel", "for cause", "for convenience", "written notice", "cure period")):
+                    relevant_clause = r
+                    answer = f"Termination & Cancellation Rights ({r['heading']}): \"{r['text'][:300]}...\""
+                    break
+
+        elif "dispute" in q_lower or "arbitrat" in q_lower or "mediat" in q_lower or "litigat" in q_lower:
+            candidates = search_results + doc_segments
+            for r in candidates:
+                r_text_lower = r["text"].lower()
+                r_head_lower = r.get("heading", "").lower()
+                if any(k in r_text_lower or k in r_head_lower for k in ("dispute", "arbitrat", "court", "jurisdiction", "venue", "mediat")):
+                    relevant_clause = r
+                    answer = f"Dispute Resolution & Arbitration terms ({r['heading']}): \"{r['text'][:300]}...\""
+                    break
+
+        elif "privacy" in q_lower or "data protection" in q_lower or "gdpr" in q_lower or "security" in q_lower:
+            candidates = search_results + doc_segments
+            for r in candidates:
+                r_text_lower = r["text"].lower()
+                r_head_lower = r.get("heading", "").lower()
+                if any(k in r_text_lower or k in r_head_lower for k in ("privacy", "personal data", "security", "gdpr", "data protection", "breach", "customer data", "soc 2")):
+                    relevant_clause = r
+                    answer = f"Data Privacy & Security terms ({r['heading']}): \"{r['text'][:300]}...\""
+                    break
+
+        elif "solicit" in q_lower or "hire" in q_lower or "poach" in q_lower:
+            candidates = search_results + doc_segments
+            for r in candidates:
+                r_text_lower = r["text"].lower()
+                r_head_lower = r.get("heading", "").lower()
+                if any(k in r_text_lower or k in r_head_lower for k in ("solicit", "hire", "employee", "personnel", "recruit")):
+                    relevant_clause = r
+                    answer = f"Non-Solicitation & Recruitment covenant ({r['heading']}): \"{r['text'][:300]}...\""
+                    break
+
+        elif "surviv" in q_lower:
+            candidates = search_results + doc_segments
+            for r in candidates:
+                r_text_lower = r["text"].lower()
+                if "surviv" in r_text_lower:
+                    relevant_clause = r
+                    answer = f"Survival terms ({r['heading']}): \"{r['text'][:300]}...\""
                     break
 
         # Fallback to top semantic vector search result

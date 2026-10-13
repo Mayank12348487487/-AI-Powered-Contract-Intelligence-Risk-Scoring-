@@ -202,4 +202,32 @@ Between Johnson & Johnson Corp ("Provider") and AT&T Media LLC ("Customer").
     res_json = client.get(f"/api/contracts/{doc_id}/export/json")
     assert res_json.status_code == 200
 
+def test_expanded_contract_qa_topics():
+    client.get("/api/contracts/samples/saas_master_agreement")
+
+    # Termination query
+    res_term = client.post(
+        "/api/contracts/sample_saas_master_agreement/chat",
+        json={"query": "How can this contract be terminated?"}
+    )
+    assert res_term.status_code == 200
+    assert "Termination" in res_term.json()["answer"] or "termination" in res_term.json()["answer"].lower()
+
+    # Dispute resolution query
+    res_disp = client.post(
+        "/api/contracts/sample_saas_master_agreement/chat",
+        json={"query": "What is the procedure for dispute resolution and arbitration?"}
+    )
+    assert res_disp.status_code == 200
+    assert "answer" in res_disp.json()
+
+    # Data privacy query
+    res_priv = client.post(
+        "/api/contracts/sample_saas_master_agreement/chat",
+        json={"query": "What are the data privacy and security requirements?"}
+    )
+    assert res_priv.status_code == 200
+    assert "answer" in res_priv.json()
+
+
 

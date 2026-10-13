@@ -1,5 +1,6 @@
 import math
 import re
+import heapq
 from typing import List, Dict, Tuple, Set, Optional
 from collections import Counter
 
@@ -175,12 +176,17 @@ class SparseInvertedIndex:
         if not scores:
             return []
 
-        # Filter by min_score and sort
+        # Filter by min_score and retrieve top_k
         scored_items = [
             (doc_idx, min(1.0, max(0.0, score)))
             for doc_idx, score in scores.items()
             if score >= min_score
         ]
+        if not scored_items:
+            return []
+
+        if len(scored_items) > top_k:
+            return heapq.nlargest(top_k, scored_items, key=lambda x: x[1])
         scored_items.sort(key=lambda x: x[1], reverse=True)
         return scored_items[:top_k]
 
