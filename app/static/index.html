@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contract Intelligence & Risk Scoring AI | CUAD NLP Studio</title>
+    <title>Contract Intelligence & Risk Scoring AI | Legal Studio</title>
     <meta name="description" content="AI-Powered Legal Contract Intelligence, CUAD 41 Clause Extraction, Named Entity Recognition, Risk Scoring & Anomaly Detection.">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=2">
 </head>
 <body class="theme-dark">
     <!-- Top Navigation Header -->
@@ -17,7 +17,7 @@
         <div class="header-left">
             <div class="brand-logo">
                 <div class="logo-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                         <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -28,7 +28,7 @@
                 </div>
                 <div class="brand-text">
                     <span class="brand-title">Contract<span class="accent-text">Intelligence</span></span>
-                    <span class="brand-badge">CUAD NLP • 41 CATEGORIES</span>
+                    <span class="brand-badge">AI Legal Studio</span>
                 </div>
             </div>
         </div>
@@ -36,9 +36,9 @@
         <div class="header-center">
             <!-- Sample Loader Dropdown -->
             <div class="sample-selector-wrap">
-                <span class="sample-label">⚡ 1-Click Samples:</span>
+                <span class="sample-label">Sample Contract:</span>
                 <select id="sampleSelect" class="custom-select" onchange="window.app.loadSample(this.value)">
-                    <option value="" disabled selected>Select a Curated Contract...</option>
+                    <option value="" disabled selected>Select a Contract...</option>
                     <option value="saas_master_agreement">📘 SaaS Master Agreement (Medium Risk)</option>
                     <option value="mutual_nda">📗 Mutual NDA (Low Risk - Safe)</option>
                     <option value="ip_licensing_unfavorable">📕 IP Licensing (Critical Risk - Unfavorable)</option>
@@ -49,22 +49,15 @@
 
         <div class="header-right">
             <button id="uploadBtn" class="btn btn-secondary" onclick="window.app.triggerUploadModal()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="17 8 12 3 7 8"></polyline>
                     <line x1="12" y1="3" x2="12" y2="15"></line>
                 </svg>
                 Upload Contract
             </button>
-            <button id="exportJsonBtn" class="btn btn-secondary" onclick="window.app.exportReport('json')" disabled title="Export raw JSON schema audit dataset (J)">
+            <button id="exportPdfBtn" class="btn btn-primary" onclick="window.app.exportReport('pdf')" disabled title="Export executive PDF audit report (E)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="16 18 22 12 16 6"></polyline>
-                    <polyline points="8 6 2 12 8 18"></polyline>
-                </svg>
-                JSON Export
-            </button>
-            <button id="exportPdfBtn" class="btn btn-primary" onclick="window.app.exportReport('pdf')" disabled title="Export executive PDF / HTML audit report (E)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="7 10 12 15 17 10"></polyline>
                     <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -84,6 +77,7 @@
     <main class="main-layout">
         <!-- Top Executive KPI Banner -->
         <section id="executiveBanner" class="executive-banner glass-panel">
+            <!-- Left: Risk Score Gauge & Verdict -->
             <div class="risk-meter-container">
                 <div class="circular-progress">
                     <svg viewBox="0 0 120 120" class="gauge-svg">
@@ -97,13 +91,13 @@
                 </div>
                 <div class="risk-meta">
                     <div class="risk-tag-wrap">
-                        <span id="riskTierBadge" class="badge badge-neutral">Awaiting Document</span>
+                        <span id="riskTierBadge" class="badge badge-neutral">Awaiting Contract</span>
                     </div>
-                    <div class="risk-title">Composite Legal Risk Index</div>
-                    <div id="riskTierDesc" class="risk-subtext">Upload a contract or select a CUAD sample above to start inference.</div>
+                    <div class="risk-title">Composite Risk Index</div>
+                    <div id="riskTierDesc" class="risk-subtext">Select a sample or upload a contract to view AI risk analysis.</div>
                     <div id="riskDistributionWrap" class="risk-dist-wrap" style="display: none;">
                         <div class="risk-dist-header">
-                            <span class="risk-dist-title">Severity Breakdown</span>
+                            <span class="risk-dist-title">Findings Breakdown</span>
                             <span id="riskDistSummary" class="risk-dist-counts">0 Crit • 0 High • 0 Med</span>
                         </div>
                         <div class="risk-dist-bar">
@@ -116,7 +110,7 @@
                 </div>
             </div>
 
-            <!-- Key Fact Chips -->
+            <!-- Center: Key Contract Terms -->
             <div class="kpi-chips-grid">
                 <div class="kpi-chip">
                     <div class="chip-icon">🏢</div>
@@ -142,16 +136,16 @@
                 <div class="kpi-chip">
                     <div class="chip-icon">🛡️</div>
                     <div class="chip-content">
-                        <div class="chip-label">CUAD Detected / Anomalies</div>
+                        <div class="chip-label">CUAD Detected / Risks</div>
                         <div id="kpiAnomalies" class="chip-value">-- Categories</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Risk Pillars Breakdown -->
+            <!-- Right: Risk Drivers Breakdown -->
             <div class="risk-pillars-container">
                 <div class="risk-pillars-header">
-                    <span class="pillars-title">RISK DRIVERS (CLICK TO FILTER)</span>
+                    <span class="pillars-title">RISK DRIVERS</span>
                     <button id="resetPillarsBtn" class="reset-pillars-btn" onclick="window.app.filterByPillar(null)" style="display: none;" title="Reset pillar filter">Reset</button>
                 </div>
                 <div id="pillarRow1" class="pillar-row clickable-pillar" onclick="window.app.filterByPillar('missing_protections')" title="Filter Missing Protections covenants">
@@ -165,7 +159,7 @@
                 </div>
                 <div id="pillarRow2" class="pillar-row clickable-pillar" onclick="window.app.filterByPillar('unfavorable_terms')" title="Filter Unfavorable Terms & Risk Anomalies">
                     <div class="pillar-info">
-                        <span>⚠️ Unfavorable Terms & Anomalies</span>
+                        <span>⚠️ Unfavorable Terms</span>
                         <span id="pillar2Score">0 / 35</span>
                     </div>
                     <div class="progress-bar-track">
@@ -174,7 +168,7 @@
                 </div>
                 <div id="pillarRow3" class="pillar-row clickable-pillar" onclick="window.app.filterByPillar('operational_lockin')" title="Filter Operational & Lock-in Risk">
                     <div class="pillar-info">
-                        <span>🔒 Operational & Lock-in Risk</span>
+                        <span>🔒 Operational Lock-in</span>
                         <span id="pillar3Score">0 / 20</span>
                     </div>
                     <div class="progress-bar-track">
@@ -183,7 +177,7 @@
                 </div>
                 <div id="pillarRow4" class="pillar-row clickable-pillar" onclick="window.app.filterByPillar('ambiguity')" title="Filter Ambiguity & Boilerplate Drift">
                     <div class="pillar-info">
-                        <span>📝 Ambiguity & Boilerplate Drift</span>
+                        <span>📝 Ambiguity Risk</span>
                         <span id="pillar4Score">0 / 10</span>
                     </div>
                     <div class="progress-bar-track">
@@ -203,7 +197,7 @@
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                             <polyline points="14 2 14 8 20 8"></polyline>
                         </svg>
-                        <span id="docViewTitle">Document Clause Viewer</span>
+                        <span id="docViewTitle">Contract Document</span>
                         <span id="docSegmentCount" class="count-badge">0 Clauses</span>
                         <div class="doc-meta-pills" id="docMetaPills">
                             <span id="docWordCount" class="count-badge count-badge-subtle">0 Words</span>
@@ -222,43 +216,38 @@
                                 <circle cx="11" cy="11" r="8"></circle>
                                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                             </svg>
-                            <input id="clauseSearchInput" type="text" class="custom-search-input" placeholder="Search clauses... (/)" oninput="window.app.searchClauses(this.value)" />
+                            <input id="clauseSearchInput" type="text" class="custom-search-input" placeholder="Search contract... (/)" oninput="window.app.searchClauses(this.value)" />
                             <span id="searchMatchCount" class="search-match-count" style="display: none;" title="Matching clauses count">0</span>
                             <button id="clearSearchBtn" class="search-clear-btn" onclick="window.app.clearSearch()" style="display: none;" title="Clear search">✕</button>
                         </div>
-                        <!-- Font Size Density Controls -->
-                        <div class="font-size-controls" title="Adjust clause text reading size (+ / -)">
+                        <!-- Font Size Controls -->
+                        <div class="font-size-controls" title="Adjust text reading size (+ / -)">
                             <button class="font-btn" onclick="window.app.adjustFontSize(-1)" title="Smaller text (-)">A-</button>
                             <button class="font-btn" onclick="window.app.adjustFontSize(1)" title="Larger text (+)">A+</button>
                         </div>
-                        <!-- Density mode toggle -->
-                        <button id="viewDensityBtn" class="density-toggle-btn" onclick="window.app.toggleViewDensity()" title="Toggle Compact Skim / Full View (V)">
-                            <span id="densityIcon">▤</span>
-                            <span id="densityLabel">Compact</span>
-                        </button>
                         <!-- Highlight filter dropdown -->
                         <select id="highlightFilter" class="custom-select-small" onchange="window.app.filterHighlights(this.value)">
-                            <option value="ALL">Show All Highlights</option>
+                            <option value="ALL">All Clauses</option>
+                            <option value="HIGH_RISK">⚠️ Flagged Risks Only</option>
                             <option value="BOOKMARKED">⭐ Bookmarked Only</option>
-                            <option value="ANNOTATED">📝 With Analyst Notes</option>
-                            <option value="HIGH_RISK">⚠️ Flagged Risk Only</option>
+                            <option value="ANNOTATED">📝 With Notes Only</option>
                             <option value="liability">Liability & Indemnity</option>
                             <option value="non_compete">Non-Compete & Restrictive</option>
-                            <option value="termination">Termination & Notice</option>
+                            <option value="termination">Termination & Renewal</option>
                             <option value="ip">Intellectual Property</option>
                         </select>
                     </div>
                 </div>
 
                 <!-- Document Reading Progress Bar -->
-                <div class="doc-progress-container" title="Document reading & scroll progress">
+                <div class="doc-progress-container" title="Document reading progress">
                     <div id="docProgressBar" class="doc-progress-bar" style="width: 0%;"></div>
                 </div>
 
                 <div id="documentContainer" class="document-content-scrollable font-size-md">
                     <div class="empty-state">
                         <div class="empty-icon">📄</div>
-                        <div class="empty-title">No Document Loaded</div>
+                        <div class="empty-title">No Contract Loaded</div>
                         <div class="empty-desc">Choose a sample contract from the top header or upload your own PDF/DOCX to view interactive highlighted legal clauses.</div>
                     </div>
                 </div>
@@ -268,20 +257,20 @@
             <div class="workspace-right glass-panel">
                 <!-- Tabs Header -->
                 <div class="tabs-nav">
-                    <button class="tab-btn active" onclick="window.app.switchTab('riskTab')">
-                        <span class="tab-icon">⚠️</span> Risk & Redlines
+                    <button class="tab-btn active" data-tab="riskTab" onclick="window.app.switchTab('riskTab')">
+                        <span class="tab-icon">⚠️</span> Risks & Redlines
                     </button>
-                    <button class="tab-btn" onclick="window.app.switchTab('entitiesTab')">
-                        <span class="tab-icon">🏢</span> Key Entities
+                    <button class="tab-btn" data-tab="chatTab" onclick="window.app.switchTab('chatTab')">
+                        <span class="tab-icon">💬</span> Ask AI (Chat)
                     </button>
-                    <button class="tab-btn" onclick="window.app.switchTab('cuadTab')">
+                    <button class="tab-btn" data-tab="entitiesTab" onclick="window.app.switchTab('entitiesTab')">
+                        <span class="tab-icon">🏢</span> Key Terms
+                    </button>
+                    <button class="tab-btn" data-tab="cuadTab" onclick="window.app.switchTab('cuadTab')">
                         <span class="tab-icon">📋</span> CUAD Taxonomy
                     </button>
-                    <button class="tab-btn" onclick="window.app.switchTab('chatTab')">
-                        <span class="tab-icon">💬</span> Legal Q&A Chat
-                    </button>
-                    <button class="tab-btn" onclick="window.app.switchTab('compareTab')">
-                        <span class="tab-icon">⚖️</span> Redline Compare
+                    <button class="tab-btn" data-tab="compareTab" onclick="window.app.switchTab('compareTab')">
+                        <span class="tab-icon">⚖️</span> Compare Drafts
                     </button>
                 </div>
 
@@ -290,24 +279,21 @@
                     <div class="tab-inner-header tab-inner-header-flex">
                         <div>
                             <div class="tab-title-row">
-                                <span class="tab-title">High-Risk Language & Mitigation Checklist</span>
+                                <span class="tab-title">Identified Risks & Suggested Redlines</span>
                                 <span id="redlinesCountBadge" class="count-badge count-badge-subtle" style="display: none;">0 Redlines</span>
                             </div>
-                            <div class="tab-subtitle">Identified compliance vulnerabilities with suggested standard fallback language.</div>
+                            <div class="tab-subtitle">Compliance issues with suggested safe fallback language.</div>
                         </div>
                         <div class="brief-btn-group">
-                            <button id="copyAllRedlinesBtn" class="btn btn-secondary copy-brief-btn copy-redlines-btn" onclick="window.app.copyAllRedlines()" title="Copy all suggested contract redlines in standard markup format">
-                                <span>⚖️</span> Copy Redline Schedule
-                            </button>
-                            <button id="copyNotesBtn" class="btn btn-secondary copy-brief-btn" onclick="window.app.copyAuditNotes()" title="Copy all marked clauses and custom analyst notes">
-                                <span>📝</span> Copy Notes & Memos
+                            <button id="copyAllRedlinesBtn" class="btn btn-secondary copy-brief-btn copy-redlines-btn" onclick="window.app.copyAllRedlines()" title="Copy all suggested contract redlines">
+                                <span>⚖️</span> Copy Redlines
                             </button>
                             <button id="copyBriefBtn" class="btn btn-secondary copy-brief-btn" onclick="window.app.copyExecutiveBriefing()" title="Copy Markdown executive audit summary to clipboard">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                                 </svg>
-                                Copy Summary Brief
+                                Copy Summary
                             </button>
                         </div>
                     </div>
@@ -316,38 +302,11 @@
                     </div>
                 </div>
 
-                <!-- Tab 2: Entities & Key Terms -->
-                <div id="entitiesTab" class="tab-pane">
-                    <div class="tab-inner-header">
-                        <div class="tab-title">Extracted Legal Entities & Key Financials</div>
-                        <div class="tab-subtitle">Automatically extracted dates, parties, liability caps, and notice windows.</div>
-                    </div>
-                    <div id="entitiesContainer" class="entities-grid-container">
-                        <div class="empty-tab-hint">No entities extracted yet.</div>
-                    </div>
-                </div>
-
-                <!-- Tab 3: CUAD 41 Taxonomy Breakdown -->
-                <div id="cuadTab" class="tab-pane">
-                    <div class="tab-inner-header">
-                        <div class="tab-title">CUAD 41 Categories Coverage Matrix</div>
-                        <div class="tab-subtitle">Benchmark analysis against the 41 Atticus legal categories.</div>
-                    </div>
-                    <div class="cuad-filters-bar">
-                        <button class="btn-pill active" onclick="window.app.filterCuadList('ALL')">All (41)</button>
-                        <button class="btn-pill" onclick="window.app.filterCuadList('PRESENT')">Present in Doc</button>
-                        <button class="btn-pill" onclick="window.app.filterCuadList('MISSING')">Missing Essential</button>
-                    </div>
-                    <div id="cuadCategoriesList" class="cuad-list-container">
-                        <div class="empty-tab-hint">Loading CUAD taxonomy schema...</div>
-                    </div>
-                </div>
-
-                <!-- Tab 4: Legal Q&A Assistant -->
+                <!-- Tab 2: Legal Q&A Assistant -->
                 <div id="chatTab" class="tab-pane chat-pane">
                     <div class="tab-inner-header">
-                        <div class="tab-title">Conversational Legal Assistant</div>
-                        <div class="tab-subtitle">Ask plain English questions grounded in the contract text.</div>
+                        <div class="tab-title">Contract Q&A Assistant</div>
+                        <div class="tab-subtitle">Ask plain English questions grounded directly in this contract's clauses.</div>
                     </div>
                     
                     <div class="quick-questions-bar">
@@ -363,7 +322,7 @@
                         <div class="chat-bubble bot">
                             <div class="bot-avatar">⚖️</div>
                             <div class="chat-text">
-                                Hello! I am your AI Contract Intelligence Assistant. Ask me anything about this agreement or click one of the quick questions above.
+                                Hello! I am your AI Contract Intelligence Assistant. Ask me anything about this agreement or select a question above.
                             </div>
                         </div>
                     </div>
@@ -371,12 +330,39 @@
                     <form id="chatForm" class="chat-input-row" onsubmit="window.app.sendChatMessage(event)">
                         <input id="chatInput" type="text" placeholder="Ask a question about this contract..." autocomplete="off" />
                         <button type="submit" class="btn btn-primary chat-send-btn">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="22" y1="2" x2="11" y2="13"></line>
                                 <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                             </svg>
                         </button>
                     </form>
+                </div>
+
+                <!-- Tab 3: Key Terms & Entities -->
+                <div id="entitiesTab" class="tab-pane">
+                    <div class="tab-inner-header">
+                        <div class="tab-title">Extracted Legal Entities & Key Terms</div>
+                        <div class="tab-subtitle">Automatically identified parties, dates, liability limits, and notice periods.</div>
+                    </div>
+                    <div id="entitiesContainer" class="entities-grid-container">
+                        <div class="empty-tab-hint">No entities extracted yet.</div>
+                    </div>
+                </div>
+
+                <!-- Tab 4: CUAD 41 Taxonomy Breakdown -->
+                <div id="cuadTab" class="tab-pane">
+                    <div class="tab-inner-header">
+                        <div class="tab-title">CUAD 41 Categories Coverage Matrix</div>
+                        <div class="tab-subtitle">Benchmark analysis against the 41 Atticus legal categories.</div>
+                    </div>
+                    <div class="cuad-filters-bar">
+                        <button class="btn-pill active" onclick="window.app.filterCuadList('ALL')">All (41)</button>
+                        <button class="btn-pill" onclick="window.app.filterCuadList('PRESENT')">Present in Doc</button>
+                        <button class="btn-pill" onclick="window.app.filterCuadList('MISSING')">Missing Essential</button>
+                    </div>
+                    <div id="cuadCategoriesList" class="cuad-list-container">
+                        <div class="empty-tab-hint">Loading CUAD taxonomy schema...</div>
+                    </div>
                 </div>
 
                 <!-- Tab 5: Side-by-Side Comparison -->
@@ -458,43 +444,27 @@
             
             <div class="shortcuts-grid">
                 <div class="shortcut-row">
-                    <div class="shortcut-desc">Focus Clause Search</div>
+                    <div class="shortcut-desc">Focus Search</div>
                     <div class="shortcut-keys"><kbd>/</kbd> <span class="shortcut-or">or</span> <kbd>Ctrl</kbd>+<kbd>K</kbd></div>
                 </div>
                 <div class="shortcut-row">
-                    <div class="shortcut-desc">Switch Tabs (Risk, Entities, CUAD...)</div>
+                    <div class="shortcut-desc">Switch Tabs</div>
                     <div class="shortcut-keys"><kbd>1</kbd> <span class="shortcut-or">to</span> <kbd>5</kbd></div>
                 </div>
                 <div class="shortcut-row">
-                    <div class="shortcut-desc">Upload Contract Modal</div>
+                    <div class="shortcut-desc">Upload Contract</div>
                     <div class="shortcut-keys"><kbd>U</kbd></div>
                 </div>
                 <div class="shortcut-row">
-                    <div class="shortcut-desc">Bookmark / Pin Active Clause</div>
-                    <div class="shortcut-keys"><kbd>B</kbd></div>
-                </div>
-                <div class="shortcut-row">
-                    <div class="shortcut-desc">Export Audit PDF / HTML</div>
+                    <div class="shortcut-desc">Export Audit PDF</div>
                     <div class="shortcut-keys"><kbd>E</kbd></div>
-                </div>
-                <div class="shortcut-row">
-                    <div class="shortcut-desc">Export Raw JSON Dataset</div>
-                    <div class="shortcut-keys"><kbd>J</kbd></div>
                 </div>
                 <div class="shortcut-row">
                     <div class="shortcut-desc">Zoom Document Text (+ / -)</div>
                     <div class="shortcut-keys"><kbd>+</kbd> <span class="shortcut-or">/</span> <kbd>-</kbd></div>
                 </div>
                 <div class="shortcut-row">
-                    <div class="shortcut-desc">Toggle Compact / Full Clause View</div>
-                    <div class="shortcut-keys"><kbd>V</kbd></div>
-                </div>
-                <div class="shortcut-row">
-                    <div class="shortcut-desc">Focus Clause Analyst Note</div>
-                    <div class="shortcut-keys"><kbd>N</kbd></div>
-                </div>
-                <div class="shortcut-row">
-                    <div class="shortcut-desc">Jump to Next / Prev Flagged Risk</div>
+                    <div class="shortcut-desc">Next / Prev Flagged Risk</div>
                     <div class="shortcut-keys"><kbd>R</kbd> <span class="shortcut-or">/</span> <kbd>Shift</kbd>+<kbd>R</kbd></div>
                 </div>
                 <div class="shortcut-row">
@@ -504,10 +474,6 @@
                 <div class="shortcut-row">
                     <div class="shortcut-desc">Close Drawers & Modals</div>
                     <div class="shortcut-keys"><kbd>Esc</kbd></div>
-                </div>
-                <div class="shortcut-row">
-                    <div class="shortcut-desc">Open Shortcuts Cheat Sheet</div>
-                    <div class="shortcut-keys"><kbd>?</kbd></div>
                 </div>
             </div>
 
@@ -554,13 +520,13 @@
             </div>
             <div class="drawer-section">
                 <div class="drawer-subheading-flex">
-                    <span class="drawer-subheading">📝 Analyst Audit Notes & Memo</span>
+                    <span class="drawer-subheading">📝 Counsel Notes</span>
                     <span id="noteSaveStatus" class="note-status-tag" style="display: none;">Saved</span>
                 </div>
                 <div class="drawer-note-container">
-                    <textarea id="drawerNoteText" class="drawer-note-input" placeholder="Add custom negotiation notes, internal counsel comments, or redline directives (N)..." rows="3" oninput="window.app.saveCurrentClauseNote(this.value)"></textarea>
+                    <textarea id="drawerNoteText" class="drawer-note-input" placeholder="Add custom negotiation comments or redline directives..." rows="3" oninput="window.app.saveCurrentClauseNote(this.value)"></textarea>
                     <div class="drawer-note-actions">
-                        <button class="btn-note-action" onclick="window.app.clearCurrentClauseNote()">Clear Note</button>
+                        <button class="btn-note-action" onclick="window.app.clearCurrentClauseNote()">Clear</button>
                         <button class="btn-note-action btn-note-action-accent" onclick="window.app.copyCurrentClauseNote()">Copy Note</button>
                     </div>
                 </div>
@@ -575,6 +541,6 @@
     <!-- Toast Notification -->
     <div id="toastNotification" class="toast" style="display: none;"></div>
 
-    <script src="/static/js/app.js"></script>
+    <script src="/static/js/app.js?v=2"></script>
 </body>
 </html>

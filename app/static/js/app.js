@@ -54,6 +54,18 @@ class ContractApp {
             });
         }
 
+        // Close drawer on click outside
+        document.addEventListener('click', (e) => {
+            const drawer = document.getElementById('clauseDrawer');
+            if (drawer && drawer.style.display !== 'none') {
+                const isInsideDrawer = drawer.contains(e.target);
+                const isClauseCard = e.target.closest('.clause-card');
+                if (!isInsideDrawer && !isClauseCard) {
+                    this.closeDrawer();
+                }
+            }
+        });
+
         await this.fetchCuadSchema();
         // Automatically load default sample SaaS agreement for instant showcase
         await this.loadSample('saas_master_agreement');
@@ -809,10 +821,15 @@ class ContractApp {
     }
 
     switchTab(tabId) {
-        document.querySelectorAll('.tabs-nav .tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tabs-nav .tab-btn').forEach(btn => {
+            if (btn.getAttribute('data-tab') === tabId) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
         document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
 
-        if (event && event.currentTarget) event.currentTarget.classList.add('active');
         const activePane = document.getElementById(tabId);
         if (activePane) activePane.classList.add('active');
     }
@@ -853,12 +870,6 @@ class ContractApp {
         const input = document.getElementById('chatInput');
         if (input) input.value = q;
         this.switchTab('chatTab');
-        // Activate chat tab button in UI
-        const chatNavBtn = document.querySelectorAll('.tabs-nav .tab-btn')[3];
-        if (chatNavBtn) {
-            document.querySelectorAll('.tabs-nav .tab-btn').forEach(b => b.classList.remove('active'));
-            chatNavBtn.classList.add('active');
-        }
         this.sendChatMessage();
     }
 
@@ -1474,16 +1485,6 @@ class ContractApp {
                     return;
                 }
 
-                if (e.key.toLowerCase() === 'j') {
-                    e.preventDefault();
-                    if (this.currentDocId) {
-                        this.exportReport('json');
-                    } else {
-                        this.showToast("Load a contract before exporting JSON (J)", 2000);
-                    }
-                    return;
-                }
-
                 if (e.key === '+' || e.key === '=') {
                     e.preventDefault();
                     this.adjustFontSize(1);
@@ -1537,15 +1538,10 @@ class ContractApp {
             }
 
             if (!isTyping && ['1', '2', '3', '4', '5'].includes(e.key)) {
-                const tabs = ['riskTab', 'entitiesTab', 'cuadTab', 'chatTab', 'compareTab'];
+                const tabs = ['riskTab', 'chatTab', 'entitiesTab', 'cuadTab', 'compareTab'];
                 const tabIdx = parseInt(e.key, 10) - 1;
                 if (tabIdx >= 0 && tabIdx < tabs.length) {
                     this.switchTab(tabs[tabIdx]);
-                    const tabBtns = document.querySelectorAll('.tabs-nav .tab-btn');
-                    if (tabBtns[tabIdx]) {
-                        tabBtns.forEach(b => b.classList.remove('active'));
-                        tabBtns[tabIdx].classList.add('active');
-                    }
                 }
             }
         });

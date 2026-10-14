@@ -45,11 +45,14 @@ async def add_process_time_and_cache_headers(request: Request, call_next):
     process_time = time.perf_counter() - start_time
     response.headers["X-Process-Time"] = f"{process_time * 1000:.2f}ms"
     
-    # Cache static assets and static taxonomy
-    if request.url.path.startswith("/static/"):
-        response.headers["Cache-Control"] = "public, max-age=86400"
-    elif request.url.path == "/api/cuad/categories":
-        response.headers["Cache-Control"] = "public, max-age=3600"
+    # Cache static assets and static taxonomy only in production
+    if not settings.DEBUG:
+        if request.url.path.startswith("/static/"):
+            response.headers["Cache-Control"] = "public, max-age=86400"
+        elif request.url.path == "/api/cuad/categories":
+            response.headers["Cache-Control"] = "public, max-age=3600"
+    else:
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         
     return response
 
